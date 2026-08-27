@@ -40,7 +40,7 @@ export const useAuthStore = create((set,get)=>({
         const existingSocket = get().socket;
         if (existingSocket?.connected) return;
         
-        const socket = io(`http://localhost:6767`);
+        const socket = io(`${BACKEND_URL}`);
         set({socket : socket})
     },
 
@@ -58,7 +58,7 @@ export const useAuthStore = create((set,get)=>({
     signup : async (data)=>{
         set({isSigningUp : true})
         try {
-            const res = await fetch(`http://localhost:6767/api/auth/signup`,{
+            const res = await fetch(`${BACKEND_URL}/api/auth/signup`,{
                 method : "POST",
                 headers : {'Content-Type': 'application/json'},
                 body : JSON.stringify(data),
@@ -86,7 +86,7 @@ export const useAuthStore = create((set,get)=>({
 
         set({isLogging : true})
         try {
-            const res = await fetch(`http://localhost:6767/api/auth/login`,{
+            const res = await fetch(`${BACKEND_URL}/api/auth/login`,{
                 method : "POST",
                 headers : {'Content-Type': 'application/json'},
                 body : JSON.stringify(data),
@@ -113,7 +113,7 @@ export const useAuthStore = create((set,get)=>({
 
     logout : async ()=> {
         try {
-            const res =  await fetch("http://localhost:6767/api/auth/logout",
+            const res =  await fetch(`${BACKEND_URL}/api/auth/logout`,
                 {
                     method : "POST",
                     credentials : "include",
