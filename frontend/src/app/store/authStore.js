@@ -3,6 +3,8 @@ import { io } from "socket.io-client";
 import { toast } from "sonner";
 import { create } from "zustand"
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 export const useAuthStore = create((set,get)=>({
     authUser : null,
     socket : null,
@@ -12,7 +14,7 @@ export const useAuthStore = create((set,get)=>({
     authCheck : async ()=>{
         try {
             const res = await fetch(
-                `http://localhost:6767/api/auth/check`, 
+                `${BACKEND_URL}/api/auth/check`, 
                 {credentials: "include", cache : "no-store"}
             );
             const responseData = await res.json();
