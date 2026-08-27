@@ -51,6 +51,7 @@ export default function Navbar() {
           </div>
 
           {/* Search bar and search button*/}
+          {authUser &&           
           <form onSubmit={handleSubmit} className="flex w-full">
             <input
               type="text"
@@ -67,7 +68,8 @@ export default function Navbar() {
             >
               Search
             </button>
-          </form>
+          </form>}
+
         </div>
 
         {/* Right section Login ,sell, chat wishlist options */}
