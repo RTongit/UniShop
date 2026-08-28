@@ -16,9 +16,9 @@ export default function createJWT(user,res) {
         // todo : needs changes : 
         {
             maxAge : 7*24*60*60*1000,
-            secure : false,
-            sameSite : "lax",
-            // Below helps protect against XSS attacks.
+            secure : (process.env.NODE_ENV==="production") ? true : false,
+            sameSite : process.env.NODE_ENV === "production" ? "none" : "lax", 
+            // Prevents client-side JavaScript from accessing the JWT cookie.
             httpOnly: true,
         }
     )
