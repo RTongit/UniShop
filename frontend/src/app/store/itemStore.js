@@ -2,6 +2,8 @@
 import { toast } from "sonner";
 import { create } from "zustand"
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 export const useItemStore = create((set,get)=>({
     items : [],
     isPosting : false,
@@ -11,7 +13,7 @@ export const useItemStore = create((set,get)=>({
         
         set({isPosting : true})
         try {
-            const res = await fetch("http://localhost:6767/api/items/post",
+            const res = await fetch(`${BACKEND_URL}/api/items/post`,
                 {
                     // Basically we are sending item info as json 
                     method : "POST",
@@ -43,7 +45,7 @@ export const useItemStore = create((set,get)=>({
         set({items : []})
         try {
             const res = await fetch(
-                `http://localhost:6767/api/items/search?title=${data}`,
+                `${BACKEND_URL}/api/items/search?title=${data}`,
                 // We generally don't need credentials unless only logged-in users can search.
                 {
                     cache : "no-store",
@@ -73,7 +75,7 @@ export const useItemStore = create((set,get)=>({
         set({isLoadingItem:true});
         try {
             const res = await fetch(
-                `http://localhost:6767/api/items/item/${itemid}`,
+                `${BACKEND_URL}/api/items/item/${itemid}`,
                 {cache:"no-store"}
             )
             const response = await res.json();
@@ -103,7 +105,7 @@ export const useItemStore = create((set,get)=>({
         set({isMyItemsLoading : true})
         set({myItems : []})
         try {
-            const res = await fetch(`http://localhost:6767/api/items/myItems`,
+            const res = await fetch(`${BACKEND_URL}/api/items/myItems`,
                 {
                     credentials:"include",
                     cache : "no-store"
@@ -128,10 +130,11 @@ export const useItemStore = create((set,get)=>({
     
     isLoadingItemToBeEdited : true,
     isEditing : false,
+
     editItem : async function(itemId,data) {
         set({isEditing : true})
         try {
-            const res = await fetch(`http://localhost:6767/api/items/item/${itemId}/edit`,
+            const res = await fetch(`${BACKEND_URL}/api/items/item/${itemId}/edit`,
                 {
                     method : "PATCH",
                     headers : {'Content-Type': 'application/json'},
@@ -165,7 +168,7 @@ export const useItemStore = create((set,get)=>({
     
     deleteItem : async function(itemid) {
         try {
-            const res = await fetch(`http://localhost:6767/api/items/delete/${itemid}`,
+            const res = await fetch(`${BACKEND_URL}/api/items/delete/${itemid}`,
                 {
                     method : "DELETE",
                     credentials : "include",

@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { create } from "zustand"
 import { useAuthStore } from "./authStore";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 export const useChatStore = create((set,get)=>({
     selectedChat : null,
     setSelectedChat : function(data) {
@@ -16,7 +18,7 @@ export const useChatStore = create((set,get)=>({
         set({isChatsLoading : true});
         try {
             const res = await fetch(
-                `http://localhost:6767/api/chat/chats`,
+                `${BACKEND_URL}/api/chat/chats`,
                 {
                     credentials : "include",
                     cache : "no-store"
@@ -41,7 +43,7 @@ export const useChatStore = create((set,get)=>({
     postChat : async function(data) {
         set({isPostingChat : true})
         try {
-            const res = await fetch(`http://localhost:6767/api/chat/`,
+            const res = await fetch(`${BACKEND_URL}/api/chat/`,
                 {
                     method : "POST",
                     headers : {'Content-Type': 'application/json'},
@@ -71,7 +73,7 @@ export const useChatStore = create((set,get)=>({
     postChatMessage : async function(data) {
         set({isPostingChatMessage : true});
         try {
-            const res = await fetch(`http://localhost:6767/api/chat/message`,
+            const res = await fetch(`${BACKEND_URL}/api/chat/message`,
                 {
                     method : "POST",
                     headers : {'Content-Type': 'application/json'},
@@ -100,7 +102,7 @@ export const useChatStore = create((set,get)=>({
         set({myMessages : []})
         try {
             const res = await fetch(
-                `http://localhost:6767/api/chat/${data}/messages`,
+                `${BACKEND_URL}/api/chat/${data}/messages`,
                 {
                     credentials : "include",
                     cache : "no-store"
