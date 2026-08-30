@@ -1,5 +1,6 @@
 "use client"
 
+import NoChatInterface from "@/app/components/NoChatInterface"
 import SideBar from "@/app/components/Sidebar.js"
 import Spinner from "@/app/components/Spinner.js"
 import { useAuthStore } from "@/app/store/authStore.js"
@@ -39,7 +40,7 @@ export default function ChatPage() {
 
             </div> 
             : 
-            <div>Messages will appear here</div>
+            <NoChatInterface/>
         }
         </>
 

@@ -9,7 +9,7 @@ import Spinner from "./components/Spinner";
 export default function HomePage() {
   const router = useRouter();
   const {authUser} = useAuthStore();
-  const {isSearching} = useItemStore();
+  const {isSearching,searchItems} = useItemStore();
 
   useEffect(()=>{
     if(!authUser) router.replace('/login');
@@ -23,8 +23,13 @@ export default function HomePage() {
   if(isSearching) return <Spinner/>
   // if we are authenticated then below 
   return (
-    <div>
-      This is HomePage
+    <div className="flex flex-col">
+      <div className=""> Welcome Back </div>
+
+      {/* Fresh new recommendations :  */}
+      {/* <div className="lg:grid-cols-4">
+
+      </div> */}
     </div>
   );
 }

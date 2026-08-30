@@ -9,6 +9,7 @@ import { useItemStore } from "@/app/store/itemStore"
 import Spinner from "@/app/components/Spinner"
 import formatDate from "@/app/constant/formatDate"
 import Link from "next/link"
+import NoPostingUI from "@/app/components/NoPostingUI"
 
 // const myItem2 = []
 
@@ -92,7 +93,7 @@ export default function ListingPage() {
 
     return (
     (myItems.length==0) ? 
-    <div>You have not posted yet</div> 
+    <NoPostingUI/>
         : 
     <div className="p-3 bg-stone-200 min-h-screen flex md:flex-row flex-col gap-x-4 md:gap-y-0 gap-y-4 md:items-start">
 
