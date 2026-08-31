@@ -40,7 +40,10 @@ export const useAuthStore = create((set,get)=>({
         const existingSocket = get().socket;
         if (existingSocket?.connected) return;
         
-        const socket = io(`${BACKEND_URL}`);
+        const socket = io(
+            `${BACKEND_URL}`,
+            {withCredentials: true,}
+        );
         set({socket : socket})
     },
 

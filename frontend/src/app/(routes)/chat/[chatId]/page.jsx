@@ -37,7 +37,7 @@ export default function MessagePage({params}) {
             socket.emit("LeaveChat",chatId) 
           }
         },
-        [chatId,socket]
+        [chatId,socket,authUser]
     )
 
     if(!authUser) return null
