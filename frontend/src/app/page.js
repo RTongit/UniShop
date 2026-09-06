@@ -24,7 +24,7 @@ export default function HomePage() {
   // if we are authenticated then below 
   return (
     <div className="flex flex-col">
-      <div className=""> Welcome Back </div>
+      <div className=""> Welcome Back To HomePage</div>
 
       {/* Fresh new recommendations :  */}
       {/* <div className="lg:grid-cols-4">

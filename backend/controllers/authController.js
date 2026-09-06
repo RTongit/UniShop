@@ -6,20 +6,25 @@ async function signup(req,res) {
     const {name,enrollmentId,password,department,graduationYear,phoneNumber,email} = req.body;
     try {
 
-        if(!name || !enrollmentId || !password || !department || !graduationYear || !phoneNumber) {
+        if(!name || !enrollmentId || !password || !department || !graduationYear || !phoneNumber || !email) {
             return res.status(400).json({message : "All fields are required"});
         }
 
         if(password.length<6) {
             return res.status(400).json({message:"Password must be atleast 6 characters long"})
         }
-        // Check for duplicate enrollmentId :
-        let existingUser = await User.findOne({enrollmentId});
-        if(existingUser) return res.status(400).json({message : "Enrollment ID already exists"});
+
+        // Check for duplicate email : 
+        let existingUser = await User.findOne({email})
+        if(existingUser) return res.status(400).json({message : "Email number already exists"});
 
         // check for duplicate phone number as well :
         existingUser = await User.findOne({phoneNumber})
         if(existingUser) return res.status(400).json({message : "Phone number already exists"});
+
+        // Check for duplicate enrollmentId :
+        existingUser = await User.findOne({enrollmentId});
+        if(existingUser) return res.status(400).json({message : "Enrollment ID already exists"});
 
         // Generate Hashed password
         const salt = await bcrypt.genSalt(10);
@@ -48,7 +53,9 @@ async function signup(req,res) {
 
         return res.status(201).json(
         {
+            userId : newUser._id,
             name : newUser.name,
+            role : newUser.role,
             enrollmentId : newUser.enrollmentId,
             department : newUser.department,
             graduationYear : newUser.graduationYear,
@@ -68,13 +75,13 @@ async function signup(req,res) {
 
 async function login(req,res) {
     try {
-        const {enrollmentId,password,email} = req.body;
+        const {email,password} = req.body;
 
-        if((!password || password==="") || ((!enrollmentId || enrollmentId==="") &&(!email || email===""))) {
+        if((!password || password==="") || (!email || email==="")) {
             return res.status(400).json({message : "Invalid credentials"});
         }
         // Verify the user
-        let existingUser = await User.findOne({$or : [{enrollmentId:enrollmentId},{email:email}]});
+        let existingUser = await User.findOne({email : email});
         if(!existingUser) return res.status(400).json({message : "Invalid credentials"});
 
         // Verify the password : 
@@ -87,6 +94,7 @@ async function login(req,res) {
         return res.status(200).json({
             userId : existingUser._id,
             name : existingUser.name,
+            role : existingUser.role
         })
     }
     catch(error) {

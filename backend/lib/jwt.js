@@ -6,6 +6,7 @@ export default function createJWT(user,res) {
         {
             userId : user._id,
             name : user.name,
+            role : user.role
         },
         process.env.SECRET_KEY,
         {expiresIn : "7d"},

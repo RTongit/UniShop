@@ -88,6 +88,11 @@ export default function SignupPage() {
       toast.error("Phone number must be 10 digits long")
       return;
     }
+    if(!email || email.trim() == "") {
+      // Todo need to add valid email format checker 
+      toast.error("Please enter your email")
+      return;
+    }
     let data = {
       name,
       enrollmentId,
@@ -297,7 +302,7 @@ export default function SignupPage() {
                 {/* Email */}
                 <div className="flex flex-col gap-2">
                   <label className="font-medium text-sm text-gray-700">
-                    Email (Optional)
+                    Email
                   </label>
 
                   <div className="relative">
