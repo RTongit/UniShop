@@ -3,7 +3,6 @@ import Spinner from "@/app/components/Spinner";
 import { useItemStore } from "@/app/store/itemStore";
 import { notFound, useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Heart, MoveLeft, Share } from "lucide-react";
 import formatDate from "@/app/constant/formatDate";
 import Link from "next/link";
@@ -163,7 +162,7 @@ export default function ItemPage({ params }) {
                   {/* <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-3 text-sm font-semibold mb-3 transition-colors">
                   💬 Contact Seller
                 </button> */}
-                  <Button 
+                  <button 
                         onClick={()=>{
 
                           async function fetchChat() {
@@ -180,9 +179,9 @@ export default function ItemPage({ params }) {
                           fetchChat()
 
                         }}
-                        className=" bg-black hover:bg-gray-700 text-white rounded-sm py-5 text-lg font-semibold mb-3 transition-colors mt-3">
+                        className=" bg-black hover:bg-gray-700 text-white rounded-sm p-3 text-lg font-semibold mb-3 transition-colors mt-3">
                     Contact Seller
-                  </Button>
+                  </button>
                 </>
               )}
             </div>

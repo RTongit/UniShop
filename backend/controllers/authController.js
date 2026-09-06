@@ -109,8 +109,8 @@ async function logout(req,res) {
         res.clearCookie('authCookie',
         {   
             // todo : Need to change for production
-            secure : false,
-            sameSite : "lax",
+            secure : (process.env.NODE_ENV==="production") ? true : false,
+            sameSite : process.env.NODE_ENV === "production" ? "none" : "lax", 
             httpOnly: true,
         })
         return res.status(200).json({message : "You have successfully logged out"});

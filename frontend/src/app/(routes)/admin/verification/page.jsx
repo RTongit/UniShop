@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from "next/navigation";
 import Spinner from '@/app/components/Spinner';
 
-const AdminPage = () => {
+const AdminVerificationPage = () => {
     const {authUser} = useAuthStore()
     const router = useRouter()
     useEffect(()=>{
@@ -12,15 +12,17 @@ const AdminPage = () => {
             router.replace("/login")
             return
         }
+        if(authUser.role!=="admin") router.replace("/");
     },
     [authUser,router])
 
   if(!authUser) return null
   return (
     <div>
+        This is Admin Verification Page
         Welcome back {authUser.name}
     </div>
   )
 }
 
-export default AdminPage
+export default AdminVerificationPage
