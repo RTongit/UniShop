@@ -108,7 +108,6 @@ async function logout(req,res) {
         // jwt is cleared :
         res.clearCookie('authCookie',
         {   
-            // todo : Need to change for production
             secure : (process.env.NODE_ENV==="production") ? true : false,
             sameSite : process.env.NODE_ENV === "production" ? "none" : "lax", 
             httpOnly: true,

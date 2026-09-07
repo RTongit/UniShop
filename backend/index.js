@@ -69,7 +69,9 @@ io.use(async (socket,next)=>{
         const existingUser = await User.findById({_id:payloadObj.userId},{password : 0})
         if(!existingUser) throw new Error("User does not exist")
 
-        socket.userId = payloadObj.userId
+
+        socket.userId = existingUser._id
+        socket.role = existingUser.role
         next();
     }
 
@@ -77,7 +79,7 @@ io.use(async (socket,next)=>{
         console.log(error)
         // Here it stops the execution of the callback function 
         // Then next(err) stops the execution of the upcoming middleware
-        // Because the Express knows that an error has occurred
+        // Because the socket.io knows that an error has occurred
         return next(new Error("Unauthorized"))
     }
 
@@ -87,6 +89,12 @@ io.use(async (socket,next)=>{
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
     
+    // If the user is admin join the admin room : 
+    if(socket.role==="admin") {
+        socket.join("adminRoom");
+        console.log(`Admin UserId = ${socket.userId} joined the adminRoom`)
+    }
+
     // Connected User joins Chat/Room :
     socket.on("JoinChat",async (chatId)=>{
 
