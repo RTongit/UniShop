@@ -30,8 +30,6 @@ async function signup(req,res) {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password,salt);
         
-        // todo : admin will verify later
-        const success = true
 
         // newUser is js object but with added mongoose features
         const newUser = new User({
@@ -44,7 +42,7 @@ async function signup(req,res) {
             profilePic : "",
             email : email,
             role : "student",
-            verificationStatus : (success) ? "verified" : "rejected"
+            verificationStatus : "pending"
         })
         await newUser.save();
 

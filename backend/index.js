@@ -69,7 +69,6 @@ io.use(async (socket,next)=>{
         const existingUser = await User.findById({_id:payloadObj.userId},{password : 0})
         if(!existingUser) throw new Error("User does not exist")
 
-
         socket.userId = existingUser._id
         socket.role = existingUser.role
         next();
