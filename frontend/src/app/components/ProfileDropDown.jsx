@@ -30,7 +30,7 @@ export default function ProfileDropdown() {
   ]
 
   return (
-    <div className="relative bg-amber-500" ref={dropdownRef} >
+    <div className="relative" ref={dropdownRef} >
 
       {/* Avatar trigger */}
       <button

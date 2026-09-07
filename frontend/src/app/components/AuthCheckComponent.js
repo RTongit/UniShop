@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useAuthStore } from "../store/authStore"
 import Spinner from "./Spinner";
+import AuthLoadingShell from "./AuthLoadingShell";
 
 export default function  AuthCheckComponent({children})  {
     const {authCheck,isCheckingAuth,connectSocket} = useAuthStore();
@@ -16,7 +17,7 @@ export default function  AuthCheckComponent({children})  {
     [authCheck,connectSocket])
 
     // if it is fetching authUser info,then show loading icon : 
-    if(isCheckingAuth) return <Spinner/>;
+    if(isCheckingAuth) return <AuthLoadingShell/>;
 
     return (<div>{children}</div>)
 }
