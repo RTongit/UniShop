@@ -17,13 +17,14 @@ export default function Navbar() {
   }
   return (
     <div className="bg-white border-b border-gray-200 md:px-6 py-4 px-3 flex items-center sticky top-0 z-10">
-      <div className="flex md:flex-row flex-col justify-between items-center w-full gap-4 ">
+      <div className="flex lg:flex-row flex-col justify-between items-center w-full gap-4 ">
 
         {/* Left section Unishop logo and search */}
-        <div className="flex md:flex-row flex-col gap-x-6 md:gap-y-0 gap-y-2 w-full">
+        <div className="flex lg:flex-row flex-col gap-x-6 lg:gap-y-0 gap-y-2 w-full lg:w-[80%]">
 
-          {/*UniShop Logo */}
+
           <div className="text-lg font-bold whitespace-nowrap flex justify-between">
+            {/*UniShop Logo */}
             <div>
               <Link href="/">
                 <span className="text-blue-600">Uni</span>
@@ -31,20 +32,20 @@ export default function Navbar() {
               </Link>
             </div>
 
-            <div className=" flex gap-5 items-center md:hidden">
-             {authUser ? (
+            <div className=" flex gap-5 items-center lg:hidden">
+              {authUser ? (
               <ProfileDropDown
                 user={authUser}
               />
-            ) : (null)}
+              ) : (null)}
 
-            {authUser ? (<Link href="/post" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
-              <ShoppingBag /> <span className="hidden md:block">Sell</span>
-            </Link>) : null}
+              {authUser ? (<Link href="/post" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
+                <ShoppingBag /> <span className="hidden lg:block">Sell</span>
+              </Link>) : null}
 
-            {authUser ? (<Link href="/chat" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
+              {authUser ? (<Link href="/chat" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
                <MessageCircle />
-            </Link>) : null}
+              </Link>) : null}
 
             </div>
 
@@ -73,8 +74,8 @@ export default function Navbar() {
         </div>
 
         {/* Right section Login ,sell, chat wishlist options */}
-        <div className="hidden md:block w-full">
-          <div className="flex gap-5 w-full items-center md:justify-end">
+        <div className="hidden lg:block w-full lg:w-[20%]">
+          <div className="flex gap-5 w-full items-center lg:justify-end">
             {authUser ? (
               <ProfileDropDown
                 onLogout={() => {
@@ -85,7 +86,7 @@ export default function Navbar() {
             ) : (null)}
 
             {authUser ? (<Link href="/post" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
-              <ShoppingBag /> <span className="hidden md:block">Sell</span>
+              <ShoppingBag /> <span className="hidden lg:block">Sell</span>
             </Link>) : null}
 
             {authUser ? (<Link href="/chat" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
@@ -94,6 +95,7 @@ export default function Navbar() {
 
           </div>
         </div>
+        
       </div>
     </div>
   );

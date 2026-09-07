@@ -22,20 +22,20 @@ export default function ProfileDropdown() {
   }, [])
 
   const menuItems = [
-    { icon: <User size={18} />, label: "Profile", href: "/profile" },
-    { icon: <MessageCircle size={18} />, label: "Messages", href: "/chat" },
-    { icon: <Package size={18} />, label: "My Listings", href: "/my-listings" },
-    { icon: <Settings size={18} />, label: "Settings", href: "/settings" },
-    { icon: <Heart size={18} />, label: "Wishlist", href: "/wishlist" },
+    { icon: <User className="md:size-5 size-3" />, label: "Profile", href: "/profile" },
+    { icon: <MessageCircle className="md:size-5 size-3" />, label: "Messages", href: "/chat" },
+    { icon: <Package className="md:size-5 size-3" />, label: "My Listings", href: "/my-listings" },
+    { icon: <Settings className="md:size-5 size-3" />, label: "Settings", href: "/settings" },
+    { icon: <Heart className="md:size-5 size-3" />, label: "Wishlist", href: "/wishlist" },
   ]
 
   return (
-    <div className="relative" ref={dropdownRef} >
+    <div className="relative bg-amber-500" ref={dropdownRef} >
 
       {/* Avatar trigger */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="rounded-full focus:outline-none"
+        className="rounded-full focus:outline-none "
       >
         {authUser?.profilePic ? (
           <img
@@ -52,7 +52,7 @@ export default function ProfileDropdown() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute md:right-40 right-15 mt-3 w-64 bg-[#1a1a1a] rounded-2xl shadow-2xl z-50 overflow-hidden border border-white/10">
+        <div className="fixed right-5 lg:top-20 top-35 w-64 bg-[#1a1a1a] rounded-2xl shadow-2xl z-50 overflow-hidden border border-white/10">
 
           {/* Menu items */}
           <div className="p-2 space-y-0.5">
