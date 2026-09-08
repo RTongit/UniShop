@@ -42,7 +42,8 @@ export default function ItemPage({ params }) {
     <div className="min-h-screen bg-gray-200 font-sans p-2">
 
       {/* Whole content */}
-      <div className="max-w-6xl mx-auto px-4 pb-8">
+      <div className="max-w-6xl mx-auto px-4 pb-8 flex flex-col ">
+
         <div className="flex flex-col gap-6">
 
           <div className="">
@@ -88,7 +89,7 @@ export default function ItemPage({ params }) {
             </div>
 
             {/* Thumbnails */}
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 mt-3 p-2">
               {singleItem.photos.map((photo, i) => (
                 <button
                   key={i}
@@ -111,13 +112,9 @@ export default function ItemPage({ params }) {
             </div>
           </div>
 
+          {/*Title ,price and meta info  */}
           <div className="bg-white border border-gray-200 p-5 flex flex-col justify-between">
-            <div>
               {/*Wistlist and share actions */}
-              <div className="flex items-center justify-end mb-3 gap-3">
-                {/* Todo need to make it functional */}
-
-              </div>
 
               {/* Title */}
               <h1 className="text-xl font-bold text-gray-900 leading-snug mb-2">
@@ -132,7 +129,7 @@ export default function ItemPage({ params }) {
               </div>
 
               {/* Meta info */}
-              <div className="grid grid-cols-2 gap-y-2 mb-4">
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-y-2 mb-4">
                 {[
                   { label: "Brand", value: (singleItem.brand && singleItem.brand!="") ?singleItem.brand : "None"  },
                   { label: "Category", value: singleItem.category },
@@ -146,14 +143,13 @@ export default function ItemPage({ params }) {
                   </div>
                 ))}
               </div>
-            </div>
 
             <div>
               {/* CTA Buttons */}
               {singleItem.isSold ? (
                 <button
                   disabled
-                  className="w-full bg-gray-200 text-gray-400 rounded-xl py-3 text-sm font-semibold cursor-not-allowed mb-3"
+                  className=" cursor-not-allowed bg-gray-400 text-white rounded-sm p-3 md:text-lg text-sm font-semibold mb-3 transition-colors mt-3"
                 >
                   Item Already Sold
                 </button>
@@ -179,20 +175,21 @@ export default function ItemPage({ params }) {
                           fetchChat()
 
                         }}
-                        className=" bg-black hover:bg-gray-700 text-white rounded-sm p-3 text-lg font-semibold mb-3 transition-colors mt-3">
+                        className=" bg-black hover:bg-gray-700 text-white rounded-sm p-3 md:text-lg text-sm font-semibold mb-3 transition-colors mt-3">
                     Contact Seller
                   </button>
                 </>
               )}
             </div>
           </div>
+
         </div>
 
         {/* DESCRIPTION + SELLER — two columns below */}
         <div className="flex md:flex-row flex-col gap-6 mt-6">
 
           {/* DESCRIPTION */}
-          <div className="bg-white border border-gray-200 p-5 w-[65%]">
+          <div className="bg-white border border-gray-200 p-5 md:w-[65%]">
             <h2 className="text-base font-bold text-gray-900 mb-3">
               Description
             </h2>
@@ -202,7 +199,7 @@ export default function ItemPage({ params }) {
           </div>
 
           {/* SELLER (todo : need to add features)*/}
-          <div className="bg-white border border-gray-200 p-5 w-[35%]">
+          <div className="bg-white border border-gray-200 p-5 md:w-[35%]">
             <h2 className="text-base font-bold text-gray-900 mb-4">
               Seller Information
             </h2>
@@ -246,8 +243,8 @@ export default function ItemPage({ params }) {
         </div>
 
         {/* todo : MORE FROM SELLER (Need to add actual data from db)*/} 
-
       </div>
+
     </div>
   );
 }
