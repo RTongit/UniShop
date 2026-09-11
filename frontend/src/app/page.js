@@ -6,6 +6,8 @@ import { useAuthStore } from "./store/authStore";
 import { useItemStore } from "./store/itemStore";
 import Spinner from "./components/Spinner";
 import Link from "next/link";
+import HomePageHeader from "./components/HomePageHeader";
+import BrowseCategories from "./components/BrowseCategories";
 
 export default function HomePage() {
   const router = useRouter();
@@ -24,8 +26,15 @@ export default function HomePage() {
   if(isSearching) return <Spinner/>
   // if we are authenticated then below 
   return (
-    <div className="flex flex-col">
-      <div className=""> Welcome  To HomePage</div>
+    <div className="flex flex-col p-5 gap-y-5">
+      {/* Header Section */}
+      <HomePageHeader/>
+
+      {/* Browse Section */}
+      <BrowseCategories/>
+
+      {/* Todo : Recently added section */}
+
       {authUser.role==="admin" ? <Link href="/admin">Go to Admin</Link> : null}
 
       {/* Fresh new recommendations :  */}

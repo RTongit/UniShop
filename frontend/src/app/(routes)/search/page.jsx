@@ -1,5 +1,6 @@
 "use client"
 import ItemCard from "@/app/components/ItemCard";
+import NoItem from "@/app/components/NoItem";
 import Spinner from "@/app/components/Spinner";
 import { useAuthStore } from "@/app/store/authStore"
 import { useItemStore } from "@/app/store/itemStore";
@@ -22,7 +23,7 @@ export default function Search() {
     if(!authUser) return null;
     if(isSearching) return <Spinner/>
     if(!hasSearched && items.length==0) return null;
-    if(hasSearched && items.length==0) return <div>No items found</div>;
+    if(hasSearched && items.length==0) return <NoItem/>;
     
     return (
         <div className="px-6 py-6">
@@ -32,7 +33,7 @@ export default function Search() {
             </div>
 
             {/*Display Grid for items*/}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="flex flex-col">
               {items.map(item => (
                  <ItemCard key={item._id} item={item} />
                ))}

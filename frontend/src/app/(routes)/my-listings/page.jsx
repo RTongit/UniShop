@@ -108,9 +108,9 @@ export default function ListingPage() {
   return myItems.length == 0 ? (
     <NoPostingUI />
   ) : (
-    <div className="p-3 bg-stone-200 min-h-screen flex md:flex-row flex-col gap-x-4 md:gap-y-0 gap-y-2 md:items-start">
+    <div className="p-3 bg-stone-200 min-h-screen flex md:flex-row flex-col gap-x-4 md:gap-y-0 gap-y-3 md:items-start">
       {/* Left section */}
-      <div className="flex flex-col  gap-y-2 md:sticky md:top-20 md:z-10 md:gap-y-4 px-3 py-5">
+      <div className="flex flex-col  gap-y-2 md:sticky md:top-20 md:z-10 md:gap-y-4 px-2">
         {/* My listing title */}
         <div className="px-4 py-2 bg-white">
           <h1 className="md:text-2xl text-md font-bold text-gray-900">
@@ -139,7 +139,7 @@ export default function ListingPage() {
         </div>
 
         {/* Container of  Sold, Available,Apply, Reset button*/}
-        <div className={`bg-white ${isFilterOpen ? "block" : "hidden"} md:block`}>
+        <div className={`bg-white ${isFilterOpen ? "block" : "hidden"} md:block py-2`}>
           {/* Sold, Available checkbox*/}
           <div className="flex  md:flex-col flex-row gap-3 bg-white px-4 py-2">
               <label className="flex gap-x-3 hover:cursor-pointer">
@@ -196,9 +196,10 @@ export default function ListingPage() {
 
       {/* Right section(contains items listed ) */}
       <div className="bg-stone-200 w-full min-h-screen md:px-3 px-2 flex flex-col gap-y-7">
-        <div className="flex p-3 gap-6 bg-white">
+        <div className="flex justify-between md:justify-start p-3 md:gap-x-6 gap-x-2 bg-white">
           <div className="flex gap-x-2 md:gap-x-4 items-center">
-            <ArrowUpDown className="size-5" /> <span>Sort by :</span>
+            <ArrowUpDown className="size-5" /> 
+            <span>Sort by : </span>
           </div>
           <button
             value="Cheap"

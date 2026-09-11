@@ -5,6 +5,7 @@ import { create } from "zustand"
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const useItemStore = create((set,get)=>({
+
     items : [],
     isPosting : false,
     isSearching : false,
