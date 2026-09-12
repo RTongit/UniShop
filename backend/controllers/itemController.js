@@ -71,8 +71,9 @@ async function searchItems(req,res) {
                 {isDeleted : false},
                 {isSold : false}
             ]
-        }  
-        );
+        }
+        ).sort({createdAt :-1});
+        
         if(items.length==0) {
             return res.status(404).json({message : "Sorry! No items found"});
         }

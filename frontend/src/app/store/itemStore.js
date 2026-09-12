@@ -59,9 +59,11 @@ export const useItemStore = create((set,get)=>({
                 set({items : []}); return;
             }
             set({items : response})
+            return response
         }
         catch(error) {
             console.log(`Error in search controller : ${error.message}`)
+            return null
         }
         finally { 
             set({isSearching : false});

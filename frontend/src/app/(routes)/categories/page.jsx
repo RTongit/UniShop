@@ -1,5 +1,8 @@
+"use client"
 import React from "react";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const categories = [
   {
@@ -49,6 +52,14 @@ const categories = [
 ];
 
 const CategoriesPage = () => {
+  const { authUser } = useAuthStore();
+  const router = useRouter()
+  
+    useEffect(() => {
+    if (!authUser) router.replace("/login");
+  }, [router, authUser]);
+
+  if (!authUser) return null;
   return (
     <main className="min-h-screen bg-white px-5 py-10 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-6xl">
