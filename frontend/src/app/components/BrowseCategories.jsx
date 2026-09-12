@@ -70,10 +70,9 @@ export default function BrowseCategory() {
   };
 
   return (
-    <section className="w-full md:px-6 py-8 px-3">
-
+    <section className="w-full md:px-6 md:py-8 py-5 px-3 flex flex-col items-center">
       {/* Top categories and more categories container */}
-      <div className="flex justify-between mb-5">
+      <div className="flex justify-between mb-5 min-w-[335px] max-w-[1506px] w-[98%]">
         {/* Heading */}
         <h2 className=" md:text-xl text-lg font-bold text-slate-900">
           Top Categories
@@ -84,14 +83,14 @@ export default function BrowseCategory() {
           onClick={() => {
             router.push("/categories");
           }}
-          className="bg-black text-white px-3 md:py-2 py-1 rounded-full text-sm hover:cursor-pointer hover:bg-gray-700"
+          className="bg-black text-white px-4 md:py-2 py-1 rounded-full text-sm hover:cursor-pointer hover:bg-gray-700"
         >
           More Categories
         </button>
       </div>
 
       {/* Category Row */}
-      <div className="flex items-center md:gap-4 gap-2">
+      <div className="flex max-w-full items-center gap-2 md:gap-4">
         {/* Left Arrow */}
         <button
           onClick={scrollLeft}
@@ -103,7 +102,7 @@ export default function BrowseCategory() {
         {/* Categories */}
         <div
           ref={scrollRef}
-          className="flex flex-1 gap-5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex min-w-0 flex-1 gap-2 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-5"
         >
           {categories.map((category) => (
             <button
@@ -113,10 +112,10 @@ export default function BrowseCategory() {
                   `/search?title=${encodeURIComponent(category.title)}`,
                 )
               }
-              className="group h-[125px] w-[110px] shrink-0 overflow-hidden rounded-lg bg-white"
+              className="group h-[110px] w-[85px] shrink-0 overflow-hidden rounded-lg bg-white md:h-[125px] md:w-[110px]"
             >
               {/* Image */}
-              <div className="h-[90px] w-full bg-stone-300 p-2">
+              <div className="h-[75px] w-full bg-stone-300 p-1 md:h-[90px] md:p-2">
                 <img
                   src={category.image}
                   alt={category.title}
@@ -126,7 +125,7 @@ export default function BrowseCategory() {
 
               {/* Category Name */}
               <div className="flex h-[35px] items-center justify-center px-1">
-                <span className="text-center text-[11px] font-medium">
+                <span className="text-center text-[10px] font-medium md:text-[11px]">
                   {category.title}
                 </span>
               </div>

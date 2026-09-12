@@ -20,7 +20,7 @@ export default function Navbar() {
       <div className="flex lg:flex-row flex-col justify-between items-center w-full gap-4 ">
 
         {/* Left section Unishop logo and search */}
-        <div className="flex lg:flex-row flex-col gap-x-6 lg:gap-y-0 gap-y-2 w-full lg:w-[80%]">
+        <div className="flex lg:flex-row flex-col gap-x-6 lg:gap-y-0 gap-y-2 w-full">
 
 
           <div className="text-lg font-bold whitespace-nowrap flex justify-between">
@@ -53,7 +53,7 @@ export default function Navbar() {
 
           {/* Search bar and search button*/}
           {authUser &&           
-          <form onSubmit={handleSubmit} className="flex w-full">
+          <form onSubmit={handleSubmit} className="flex w-full ">
             <input
               type="text"
               placeholder="Search for laptops, books, cycles..."
@@ -74,7 +74,7 @@ export default function Navbar() {
         </div>
 
         {/* Right section Login ,sell, chat wishlist options */}
-        <div className="hidden lg:block w-full lg:w-[20%]">
+        <div className="hidden lg:block min-w-[220px]">
           <div className="flex gap-5 w-full items-center lg:justify-end">
             {authUser ? (
               <ProfileDropDown

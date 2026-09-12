@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/app/store/authStore";
 
 const categories = [
   {
@@ -55,7 +56,7 @@ const CategoriesPage = () => {
   const { authUser } = useAuthStore();
   const router = useRouter()
   
-    useEffect(() => {
+  useEffect(() => {
     if (!authUser) router.replace("/login");
   }, [router, authUser]);
 
