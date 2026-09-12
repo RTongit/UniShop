@@ -70,12 +70,12 @@ export default function BrowseCategory() {
   };
 
   return (
-    <section className="w-full px-6 py-8">
+    <section className="w-full md:px-6 py-8 px-3">
 
       {/* Top categories and more categories container */}
-      <div className="flex md:flex-row flex-col justify-start items-start md:items-center md:justify-between mb-5 p-2">
+      <div className="flex justify-between mb-5">
         {/* Heading */}
-        <h2 className=" text-xl font-bold text-slate-900 px-2 py-2">
+        <h2 className=" md:text-xl text-lg font-bold text-slate-900">
           Top Categories
         </h2>
 
@@ -84,14 +84,14 @@ export default function BrowseCategory() {
           onClick={() => {
             router.push("/categories");
           }}
-          className="bg-black text-white px-4 py-2 rounded-full text-sm hover:cursor-pointer hover:bg-gray-700"
+          className="bg-black text-white px-3 md:py-2 py-1 rounded-full text-sm hover:cursor-pointer hover:bg-gray-700"
         >
           More Categories
         </button>
       </div>
 
       {/* Category Row */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center md:gap-4 gap-2">
         {/* Left Arrow */}
         <button
           onClick={scrollLeft}
@@ -142,6 +142,7 @@ export default function BrowseCategory() {
           <ChevronRight size={17} />
         </button>
       </div>
+
     </section>
   );
 }

@@ -68,7 +68,8 @@ async function searchItems(req,res) {
                   {category:{$regex : title , $options : "i"}}
                   ]
                 },
-                {isDeleted : false}
+                {isDeleted : false},
+                {isSold : false}
             ]
         }  
         );

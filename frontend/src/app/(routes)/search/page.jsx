@@ -39,8 +39,6 @@ export default function Search() {
                ))}
             </div>
 
-            {/* Todo : Need to add click the card to see detail feature */}
-
         </div>
     )
 }

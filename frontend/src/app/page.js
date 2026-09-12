@@ -26,7 +26,7 @@ export default function HomePage() {
   if(isSearching) return <Spinner/>
   // if we are authenticated then below 
   return (
-    <div className="flex flex-col p-5 gap-y-5">
+    <div className="flex flex-col p-2 gap-y-5">
       {/* Header Section */}
       <HomePageHeader/>
 

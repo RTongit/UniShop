@@ -12,6 +12,7 @@ const NoItem = () => {
           className="md:size-40 size-20"
         />
         <h1 className="md:text-2xl text-xl font-medium">No items found</h1>
+        <Link href="/" className="hover:underline"> Go to HomePage</Link>
       </div>
     </div>
   );
