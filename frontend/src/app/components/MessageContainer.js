@@ -204,7 +204,7 @@ const MessageContainer = ({ chatId }) => {
   function removePhoto() {}
 
   return (
-    <div className="flex flex-col h-full w-full bg-white">
+    <div className="flex flex-col h-full w-full">
       
       {/* Header containing userToChat name and its profilePic and cross*/}
       <div className="flex h-15 items-center justify-between border-b border-gray-200 bg-white px-6 py-2">
@@ -253,7 +253,7 @@ const MessageContainer = ({ chatId }) => {
 
       </div>
 
-      {/*Message logs section*/}
+      {/*Messages logs section*/}
       <div className="overflow-y-scroll h-full" >
           {myMessages.map((message,i)=>(
           <div key={i} className="flex flex-col gap-y-1 p-2">
