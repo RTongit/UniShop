@@ -26,15 +26,15 @@ export default function ChatPage() {
         {
             myChats.length>0 ? 
 
-            <div className="flex w-full h-screen bg-stone-200 p-3 gap-x-3">
+            <div className="flex md:flex-row flex-col w-full h-screen bg-stone-200 p-3 gap-x-3">
                 
                 {/* Side bar containing chats */}
-                <div className="md:w-[25%] w-[30%] h-full">
+                <div className="min-w-[280px]  h-full">
                     <SideBar/>
                 </div>
 
                 {/* Default Conversational Panel */}
-                <div className="h-full md:w-[75%] w-[70%] md:block hidden">
+                <div className="w-full h-full md:block hidden">
                     <img src="/emptyChat2.png" alt="emptyChat" className="object-cover h-full w-full"/>
                 </div>
 

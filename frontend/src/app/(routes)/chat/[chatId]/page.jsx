@@ -52,13 +52,13 @@ export default function MessagePage({params}) {
             <div className="flex w-full h-[89vh] bg-stone-200 p-3 gap-x-3 relative overflow-hidden">
 
                 {/* Side bar containing chats */}
-                <div className="flex flex-col gap-y-3 md:w-[25%] w-[30%] rounded-md min-h-0">
+                <div className="gap-y-3 min-w-[280px] rounded-md min-h-0 md:flex md:flex-col hidden">
                     <SideBar/>
                 </div>
 
                 {/* Message container containing messages :  */}
 
-                <div className="h-full md:w-[75%] w-[70%]">
+                <div className="w-full h-full">
                     {selectedChat ? <MessageContainer chatId={chatId}/> : 
                     (<img src="/emptyChat2.png" alt="emptyChat" className="object-cover h-full w-full"/>)}
                 </div>

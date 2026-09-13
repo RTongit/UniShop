@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useChatStore } from "../store/chatStore.js";
 import { useAuthStore } from "../store/authStore.js";
 import { useEffect } from "react";
+import formatDate from "../constant/formatDate.js";
 
 export default function SideBar() {
   const { myChats, selectedChat, setSelectedChat } = useChatStore();
@@ -16,12 +17,14 @@ export default function SideBar() {
           onClick={() => {
             setSelectedChat(chat);
           }}
-          className={`${(selectedChat && (selectedChat._id == chat._id)) ? "bg-gray-200 rounded-xl" : "bg-white"} py-3 px-2`}
+          className={`${(selectedChat && (selectedChat._id == chat._id)) ? "bg-stone-200 rounded-xl" : "bg-white"} py-3 px-2 hover:bg-stone-200 hover:rounded-xl`}
           href={`/chat/${chat._id}`}
         >
           <div className="flex justify-between">
-            {/* Profile pic and toChatUser info */}
+
+            {/*Left Section*/}
             <div className="flex gap-x-3">
+              {/* Profile Pic */}
               <div className="size-10 bg-amber-800 rounded-full overflow-hidden">
                 <img
                   src={`${authUser.userId === chat.buyer._id.toString() ?   
@@ -35,21 +38,38 @@ export default function SideBar() {
                 />
               </div>
 
+              {/* User info */}
               <div className="flex flex-col gap-y-2">
                 <span className="font-medium">
                   {authUser.userId === chat.buyer._id.toString()
-                    ? chat.seller.name + " (Seller)"
-                    : chat.buyer.name + " (Buyer)"
+                    ? 
+                    (<div className="flex flex-col gap-y-1">
+                      <span>{chat.seller.name}</span>
+                      <span className="text-sm text-gray-500">Seller</span>
+                    </div>)
+                    : 
+                    (<div className="flex flex-col gap-y-1">
+                      <span>{chat.buyer.name}</span>
+                      <span className="text-sm text-gray-500">Buyer</span>
+                    </div>)
                   }
-                  {/* {console.log(`AuthUserId =  ${authUser.userId }`)}
-                  {console.log(`BuyerId =  ${chat.buyer._id }`)}
-                  {console.log(`SellerId =  ${chat.seller._id }`)} */}
                 </span>
                 <span className="text-sm">{chat.item.title}</span>
               </div>
 
             </div>
-            {/* Time of  */}
+
+            {/*Right section*/}
+            <div className="flex flex-col gap-y-1">
+
+              {/* Time of last chat*/}
+              {chat && chat.newMessageTime!="" ? 
+              (<span>{formatDate(chat.newMessageTime)}</span>)
+              : null}
+
+              <span>.</span>
+            </div>
+
           </div>
         </Link>
       ))}

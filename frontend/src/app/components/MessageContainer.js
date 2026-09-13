@@ -1,12 +1,13 @@
 "use client";
 
-import { LoaderCircle, Paperclip, Send } from "lucide-react";
+import { Cross, LoaderCircle, Paperclip, Send, X } from "lucide-react";
 import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/authStore";
 import Message from "./Message";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Spinner from "./Spinner";
+import { useRouter } from "next/navigation";
 
 // dummy data :
 const MessageColor = {
@@ -144,6 +145,7 @@ const MessageContainer = ({ chatId }) => {
   const { authUser } = useAuthStore();
   const [text, setText] = useState("");
   const [image, setImage] = useState("");
+  const router = useRouter()
 
   const isInitialLoad = useRef(true);
 
@@ -198,12 +200,15 @@ const MessageContainer = ({ chatId }) => {
     });
   }
 
+  // Todo : will add later
   function removePhoto() {}
 
   return (
     <div className="flex flex-col h-full w-full bg-white">
-      {/* Header containing userToChat name and its profilePic */}
+      
+      {/* Header containing userToChat name and its profilePic and cross*/}
       <div className="flex h-15 items-center justify-between border-b border-gray-200 bg-white px-6 py-2">
+        
         {/* Profile */}
         <div className="flex items-center gap-3 ">
           <div className="relative">
@@ -219,20 +224,36 @@ const MessageContainer = ({ chatId }) => {
             <span className="size-3 rounded-full bg-green-600 bottom-2 right-0.5 absolute" />
           </div>
 
-          <div>
+          <div className="flex flex-col gap-y-1">
             <h2 className="text-base font-semibold text-gray-900">
               {authUser.userId == selectedChat.buyer._id.toString()
                 ? selectedChat.seller.name
                 : selectedChat.buyer.name}
             </h2>
+            <span>
+              {authUser.userId == selectedChat.buyer._id.toString()
+                ? "Seller"
+                : "Buyer"
+              }
+            </span>
           </div>
         </div>
 
+        {/* Cross or return button */}
+        <button 
+          onClick={()=>{
+            if(setSelectedChat) setSelectedChat(null)
+            router.replace("/chat")
+          }}
+        >
+          <X/>
+        </button>
+
         {/* Actions todo need to implement three dots feature later */}
+
       </div>
 
       {/*Message logs section*/}
-
       <div className="overflow-y-scroll h-full" >
           {myMessages.map((message,i)=>(
           <div key={i} className="flex flex-col gap-y-1 p-2">
@@ -309,6 +330,7 @@ const MessageContainer = ({ chatId }) => {
           </button>
         )}
       </form>
+
     </div>
   );
 };

@@ -57,7 +57,7 @@ export default function Navbar() {
             <input
               type="text"
               placeholder="Search for laptops, books, cycles..."
-              className="w-full border border-r-0 border-gray-200 rounded-l-lg px-4 py-2 text-[10px] sm:text-sm outline-none focus:border-blue-500 text-gray-900"
+              className="w-full border border-r-0 border-gray-200 rounded-l-lg px-4 py-2 text-[12px] sm:text-sm outline-none focus:border-blue-500 text-gray-900"
               onChange={(e) => {
                 setItem(e.target.value);
               }}
