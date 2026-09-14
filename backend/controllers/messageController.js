@@ -84,6 +84,7 @@ async function getChats(req, res) {
       .populate("seller", "name profilePic")
       .populate("item", "title")
       .lean();
+    
 
     await Promise.all(
       chats.map(async (chat) => {
@@ -101,8 +102,7 @@ async function getChats(req, res) {
             return res.status(500).json({ message: "Internal Server Error" });
           }
         }
-        await fetchData();
-        return chat;
+        return await fetchData();;
       }),
     );
 

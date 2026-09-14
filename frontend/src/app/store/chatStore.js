@@ -14,7 +14,7 @@ export const useChatStore = create((set,get)=>({
     myChats : [],
     isChatsLoading : true,
     getChats : async function() {
-        set({chat : []});
+        set({myChats : []});
         set({isChatsLoading : true});
         try {
             const res = await fetch(

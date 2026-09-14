@@ -25,8 +25,9 @@ export default function MessagePage({ params }) {
 
   useEffect(() => {
     if (!authUser) router.replace("/login");
+    if (!selectedChat) router.replace("/chat");
     if (isPostingChat == false) getChats();
-  }, [router, authUser, getChats, isPostingChat]);
+  }, [router, authUser, getChats, isPostingChat,selectedChat]);
 
   useEffect(() => {
     getChatMessages(chatId);
@@ -44,9 +45,11 @@ export default function MessagePage({ params }) {
   }, [chatId, socket, authUser]);
 
   if (!authUser) return null;
+  if(selectedChat==null) return null;
   if (isChatsLoading) return <Spinner />;
   if (isPostingChat) return <Spinner />;
   if (isMessagesLoading) return <Spinner />;
+
   return (
     <div className="flex md:flex-row flex-col h-[calc(100vh-122px)] lg:h-[calc(100vh-78px)] bg-stone-100 p-3 gap-x-3">
       
@@ -57,15 +60,7 @@ export default function MessagePage({ params }) {
 
       {/* Message container containing messages :  */}
       <div className="w-full h-full">
-        {selectedChat ? (
-          <MessageContainer chatId={chatId} />
-        ) : (
-          <img
-            src="/emptyChat2.png"
-            alt="emptyChat"
-            className="object-cover h-full w-full"
-          />
-        )}
+        <MessageContainer chatId={chatId} />
       </div>
 
     </div>

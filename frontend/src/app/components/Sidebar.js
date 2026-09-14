@@ -64,9 +64,10 @@ export default function SideBar() {
 
               {/* Time of last chat*/}
               {chat && chat.newMessageTime!="" ? 
-              (<span>{formatDate(chat.newMessageTime)}</span>)
+              (<span className="text-[11px]">{formatDate(chat.newMessageTime)}</span>)
               : null}
-
+              
+              {/* New message dot */}
               <span>.</span>
             </div>
 
