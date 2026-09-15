@@ -26,10 +26,10 @@ export default function ChatPage() {
         {
             myChats.length>0 ? 
 
-            <div className="flex md:flex-row flex-col w-full h-screen bg-stone-200 p-3 gap-x-3">
+            <div className="flex md:flex-row flex-col h-[calc(100vh-122px)] lg:h-[calc(100vh-78px)] bg-stone-100 p-3 gap-x-3">
                 
                 {/* Side bar containing chats */}
-                <div className="min-w-[280px]  h-full">
+                <div className="gap-y-3 min-w-[280px] rounded-md h-full md:flex md:flex-col overflow-y-auto">
                     <SideBar/>
                 </div>
 
