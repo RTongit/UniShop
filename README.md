@@ -12,7 +12,7 @@ Students can create listings, discover items through search and filtering, view 
 
 ##  Live Demo
 
-**Frontend:** https://uni-shop-jet.vercel.app
+**Live Link:** https://uni-shop-jet.vercel.app
 
 **GitHub:** https://github.com/RTongit/UniShop
 

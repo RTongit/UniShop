@@ -54,6 +54,10 @@ const userSchema = new mongoose.Schema(
             type : String,
             enum: ["pending", "verified", "rejected"],
             default : "verified"
+        },
+        hasUnreadMessage : {
+            type : Boolean,
+            default : false
         }
     },
 

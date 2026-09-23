@@ -162,8 +162,14 @@ async function postChatMessage(req, res) {
       { path: "sender", select: "name profilePic" },
     ]);
 
+
     const io = req.app.get("io");
     io.to(chatId).emit("newMessage", newChatMessage);
+
+    // todo needs modification :
+    // update the receiver hasUnreadMessage to true :
+    await User.findByIdAndUpdate(newReceiver,{$set : {hasUnreadMessage : true}});
+
 
     return res.status(201).json(newChatMessage);
   } catch (error) {
@@ -202,4 +208,17 @@ async function getChatMessages(req, res) {
   }
 }
 
-export { getChats, getChatMessages, postChat, postChatMessage };
+async function getNotificationStatus(req,res) {
+  const LoggedUser = req.AuthUser.userId;
+  try {
+    const user = await User.findOne({_id : LoggedUser}).select({hasUnreadMessage : 1})
+    return res.status(200).json({hasUnreadMessage : user.hasUnreadMessage})
+  }
+
+  catch(error) {
+    console.log(`Error in getNotificationStatus controller : ${error.message}`);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export { getChats, getChatMessages, postChat, postChatMessage,getNotificationStatus };

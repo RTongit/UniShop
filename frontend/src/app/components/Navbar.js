@@ -1,27 +1,40 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "../store/authStore";
 import ProfileDropDown from "./ProfileDropDown";
 import { MessageCircle, ShoppingBag } from "lucide-react";
+import { useChatStore } from "../store/chatStore";
 
 export default function Navbar() {
   let [item, setItem] = useState("");
   const router = useRouter();
   const { authUser,logout } = useAuthStore();
+  const [hasUnreadMessage, setHasUnreadMessage] = useState(false);
+  const {getNotificationStatus} = useChatStore()
+
+  useEffect(()=>{
+    async function fetchData() {
+      const response = await getNotificationStatus()
+      if(response==null) return;
+      setHasUnreadMessage(response.hasUnreadMessage);
+    }
+    fetchData();
+  },
+  [getNotificationStatus])
 
   function handleSubmit(e) {
     e.preventDefault();
     router.push(`/search?title=${encodeURIComponent(item)}`);
   }
+  
   return (
     <div className="bg-white border-b border-gray-200 md:px-6 py-4 px-3 flex items-center sticky top-0 z-10">
       <div className="flex lg:flex-row flex-col justify-between items-center w-full gap-4 ">
 
         {/* Left section Unishop logo and search */}
         <div className="flex lg:flex-row flex-col gap-x-6 lg:gap-y-0 gap-y-2 w-full">
-
 
           <div className="text-lg font-bold whitespace-nowrap flex justify-between">
             {/*UniShop Logo */}
@@ -43,9 +56,17 @@ export default function Navbar() {
                 <ShoppingBag /> <span className="hidden lg:block">Sell</span>
               </Link>) : null}
 
-              {authUser ? (<Link href="/chat" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
-               <MessageCircle />
-              </Link>) : null}
+              {authUser ? (
+                <Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
+                 <MessageCircle />
+
+                  {hasUnreadMessage==true ? 
+                    (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-red-500" />)
+                     : 
+                    null
+                  }
+                </Link>
+              ) : null}
 
             </div>
 
@@ -89,9 +110,16 @@ export default function Navbar() {
               <ShoppingBag /> <span className="hidden lg:block">Sell</span>
             </Link>) : null}
 
-            {authUser ? (<Link href="/chat" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
+            {authUser ? 
+            (<Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
               <MessageCircle />
-            </Link>) : null}
+              {hasUnreadMessage==true ? 
+               (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-red-500" />)
+                : 
+               null
+              }
+             </Link>) 
+             : null}
 
           </div>
         </div>

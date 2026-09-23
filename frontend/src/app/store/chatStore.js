@@ -125,6 +125,7 @@ export const useChatStore = create((set,get)=>({
     subscribeToMessage : () => {
         const socket = useAuthStore.getState().socket
         if(socket) {
+            // mtMessages is an individual chat messages
             socket.on("newMessage",(newChatMessage)=>{
                 set({myMessages : [...get().myMessages,newChatMessage]})
             })
@@ -134,7 +135,28 @@ export const useChatStore = create((set,get)=>({
         const socket = useAuthStore.getState().socket
         if(!socket) return 
         socket.off("newMessage");
-    }
-    
+    },
 
+    getNotificationStatus : async function() {
+        try {
+            const res = await fetch(
+                `${BACKEND_URL}/api/chat/users/notification-status`,
+                {
+                    credentials : "include",
+                    cache : "no-store"
+                }
+            )
+            const response = await res.json();
+            if(!res.ok) {
+                throw new Error(response.message)
+            }
+            return response
+        }
+
+        catch(error) {
+            toast.error(error.message)
+            return null
+        }
+    },
+    
 }))
