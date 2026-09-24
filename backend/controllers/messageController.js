@@ -166,6 +166,13 @@ async function postChatMessage(req, res) {
     const io = req.app.get("io");
     io.to(chatId).emit("newMessage", newChatMessage);
 
+
+    const sockets = await io.in(chatId).fetchSockets()
+    let receiverIsInChat = false
+    for(let i = 0;i<sockets.length;i++) {
+      if(sockets[i].userId==newReceiver) receiverIsInChat = true;
+    }
+
     // todo needs modification :
     // update the receiver hasUnreadMessage to true :
     await User.findByIdAndUpdate(newReceiver,{$set : {hasUnreadMessage : true}});
