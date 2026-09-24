@@ -12,7 +12,7 @@ export default function Navbar() {
   const router = useRouter();
   const { authUser,logout } = useAuthStore();
   const [hasUnreadMessage, setHasUnreadMessage] = useState(false);
-  const {getNotificationStatus} = useChatStore()
+  const {getNotificationStatus,updateNotificationStatus} = useChatStore()
 
   useEffect(()=>{
     async function fetchData() {
@@ -57,11 +57,17 @@ export default function Navbar() {
               </Link>) : null}
 
               {authUser ? (
-                <Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
+                <Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
+                 onClick={async ()=>{
+                  const response = await updateNotificationStatus();
+                  if(response==null) return
+                  setHasUnreadMessage(response.hasUnreadMessage)
+                 }}
+                 >
                  <MessageCircle />
 
                   {hasUnreadMessage==true ? 
-                    (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-red-500" />)
+                    (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-[#DC143C]" />)
                      : 
                     null
                   }
@@ -111,10 +117,17 @@ export default function Navbar() {
             </Link>) : null}
 
             {authUser ? 
-            (<Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
+            (<Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
+              onClick={async ()=>{
+                const response = await updateNotificationStatus();
+                if(response==null) return
+                setHasUnreadMessage(response.hasUnreadMessage)
+                }
+              }
+              >
               <MessageCircle />
               {hasUnreadMessage==true ? 
-               (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-red-500" />)
+               (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-[#DC143C]" />)
                 : 
                null
               }

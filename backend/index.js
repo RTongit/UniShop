@@ -93,6 +93,10 @@ io.on("connection", (socket) => {
         socket.join("adminRoom");
         console.log(`Admin UserId = ${socket.userId} joined the adminRoom`)
     }
+    // normal user joined room with value same as its userID
+    else {
+        socket.join(socket.userId);
+    }
 
     // Connected User joins Chat/Room :
     socket.on("JoinChat",async (chatId)=>{

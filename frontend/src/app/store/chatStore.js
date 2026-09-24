@@ -158,5 +158,29 @@ export const useChatStore = create((set,get)=>({
             return null
         }
     },
+
+    updateNotificationStatus : async function() {
+        try {
+            const res = await fetch(
+                `${BACKEND_URL}/api/chat/users/update-notification-status`,
+                {
+                    method : "PATCH",
+                    headers : {'Content-Type': 'application/json'},
+                    credentials : "include",
+                    cache : "no-store",
+                }
+            )
+            const response = await res.json();
+            if(!res.ok) {
+                throw new Error(response.message)
+            }
+            return response
+        }
+
+        catch(error) {
+            toast.error(error.message)
+            return null
+        }
+    },
     
 }))

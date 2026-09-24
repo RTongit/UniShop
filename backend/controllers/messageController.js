@@ -221,4 +221,22 @@ async function getNotificationStatus(req,res) {
   }
 }
 
-export { getChats, getChatMessages, postChat, postChatMessage,getNotificationStatus };
+async function updateNotificationStatus(req,res) {
+  const LoggedUser = req.AuthUser.userId;
+  try {
+    const user = await User.findByIdAndUpdate(
+      {_id : LoggedUser},
+      {$set : {hasUnreadMessage : false}},
+      {returnDocument : "after"}
+    )
+    .select({hasUnreadMessage : 1})
+    return res.status(200).json({hasUnreadMessage : user.hasUnreadMessage})
+  }
+
+  catch(error) {
+    console.log(`Error in updateNotificationStatus controller : ${error.message}`);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export { getChats, getChatMessages, postChat, postChatMessage,getNotificationStatus,updateNotificationStatus };
