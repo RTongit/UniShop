@@ -11,8 +11,8 @@ import { useRouter } from "next/navigation";
 
 // dummy data :
 const MessageColor = {
-  white: "bg-[#eef0f8]",
-  purple: "bg-purple-500",
+  gray: "bg-stone-200",
+  blue: "bg-[#1F79FF]",
 };
 
 const myMessagesDummy = [
@@ -260,9 +260,11 @@ const MessageContainer = ({ chatId }) => {
             {message.sender._id.toString()==authUser.userId ? 
               (
                 <div className="flex justify-end" >
-                  <Message text={message.text} 
+                  <Message 
+                  text={message.text} 
+                  textColor = "text-gray-800"
                   user={message.sender} image = {message.image} 
-                  color = {MessageColor.white}
+                  color = {MessageColor.gray}
                   pos = "justify-end"
                   createdAt={message.createdAt}
                   />
@@ -271,9 +273,11 @@ const MessageContainer = ({ chatId }) => {
               :
               (
                 <div className="flex justify-start">
-                  <Message text={message.text} 
+                  <Message 
+                  text={message.text} 
+                  textColor = "text-white"
                   user={message.sender} image = {message.image}
-                  color = {MessageColor.purple}
+                  color = {MessageColor.blue}
                   pos = "justify-start"
                   createdAt={message.createdAt}
                   />
@@ -295,7 +299,7 @@ const MessageContainer = ({ chatId }) => {
         }}
       >
         <label className="flex items-center px-4 hover:cursor-pointer">
-          <Paperclip />
+          <Paperclip className="size-5 md:size-6"/>
           <input
             type="file"
             accept="image/*"
@@ -303,6 +307,7 @@ const MessageContainer = ({ chatId }) => {
             onChange={(e) => handlePhotoUpload(e)}
           />
         </label>
+
         <input
           type="text"
           className="w-[85%] h-full mx-auto focus:outline-none"
@@ -315,18 +320,18 @@ const MessageContainer = ({ chatId }) => {
 
         {isPostingChatMessage ? (
           <button
-            className="flex items-center justify-center size-10 m-auto text-gray-400"
+            className="flex items-center px-4 text-gray-400"
             disabled
           >
-            <LoaderCircle className="size-5 animate-spin" />
+            <LoaderCircle className="size-5  md:size-6 animate-spin" />
           </button>
         ) : (
           <button
-            className="flex items-center justify-center hover:cursor-pointer size-10 m-auto text-gray-900 disabled:text-gray-400"
+            className="flex px-4 items-center hover:cursor-pointer text-gray-900 disabled:text-gray-400"
             type="submit"
             disabled={text.trim() == "" && image.trim() == "" ? true : false}
           >
-            <Send className="" />
+            <Send className="size-5 md:size-6"/>
           </button>
         )}
       </form>

@@ -3,11 +3,12 @@
 import formatDate from "../constant/formatDate";
 import { useAuthStore } from "../store/authStore";
 
-export default function Message({ text, user, image, color, pos, createdAt }) {
+export default function Message({ text, textColor, user, image, color, pos, createdAt }) {
   const { authUser } = useAuthStore();
   return (
     <div className={`flex items-end gap-x-4 ${pos}`}>
-      {/* Profile */}
+
+      {/* Profile(Left Section) */}
       <div>
         {!user.profilePic || user.profilePic.trim() === "" ? (
           <img
@@ -26,15 +27,17 @@ export default function Message({ text, user, image, color, pos, createdAt }) {
 
       {/* Right Section */}
       <div className="flex max-w-[70%] min-w-0 flex-col">
+
+        {/* Name */}
         <p className="mb-1 text-xs font-semibold text-gray-600">
           {user.name === authUser.name ? "You" : user.name}
         </p>
 
         {/* Text */}
         <div
-          className={`w-fit max-w-full rounded-2xl rounded-bl-md ${color} px-4 py-3`}
+          className={`w-fit max-w-full rounded-lg rounded-bl-md ${color} px-4 py-3`}
         >
-          <p className="break-words whitespace-pre-wrap text-sm leading-5 text-gray-800">
+          <p className={`break-words whitespace-pre-wrap text-sm leading-5 ${textColor}`}>
             {text}
           </p>
         </div>
@@ -52,6 +55,7 @@ export default function Message({ text, user, image, color, pos, createdAt }) {
         <div className="mt-1 text-[11px] text-gray-400">
           {formatDate(createdAt)}
         </div>
+
       </div>
     </div>
   );
