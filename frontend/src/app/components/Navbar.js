@@ -10,7 +10,7 @@ import { useChatStore } from "../store/chatStore";
 export default function Navbar() {
   let [item, setItem] = useState("");
   const router = useRouter();
-  const { authUser,logout } = useAuthStore();
+  const { authUser,logout,socket } = useAuthStore();
   const [hasUnreadMessage, setHasUnreadMessage] = useState(false);
   const {getNotificationStatus,updateNotificationStatus} = useChatStore()
 
@@ -23,6 +23,24 @@ export default function Navbar() {
     fetchData();
   },
   [getNotificationStatus])
+
+  // It listens for global notification event named = newGlobalNotification
+  useEffect(
+    ()=>{
+      if(!socket) return
+      const handleGlobalNotification = (message) => {
+        console.log("🔥 RECEIVED:", message);
+        setHasUnreadMessage(message.hasUnreadMessage);
+      };
+      socket.on("newGlobalNotification", handleGlobalNotification);
+
+      // Handle cleanup of previous listener
+      return () =>{ 
+        socket.off("newGlobalNotification", handleGlobalNotification);
+      }
+    },
+    [socket]
+  )
 
   function handleSubmit(e) {
     e.preventDefault();

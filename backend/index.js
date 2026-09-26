@@ -86,16 +86,19 @@ io.use(async (socket,next)=>{
 
 // io object listens for event name connection from frontend socket
 io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
+    // console.log("User connected:", socket.userId);
+    console.log(typeof socket.userId, socket.userId.toString());
     
     // If the user is admin join the admin room : 
     if(socket.role==="admin") {
         socket.join("adminRoom");
         console.log(`Admin UserId = ${socket.userId} joined the adminRoom`)
     }
+
     // normal user joined room with value same as its userID
     else {
-        socket.join(socket.userId);
+        socket.join(socket.userId.toString());
+        // console.log(`User joined the UserRoom ${socket.userId} `)
     }
 
     // Connected User joins Chat/Room :
@@ -112,7 +115,7 @@ io.on("connection", (socket) => {
             })
             if(!existingChat) throw new Error("You are not authorized to join this chat");
             socket.join(chatId)
-            console.log(`SocketId = ${socket.id} joined the chatId = ${chatId}`)
+            // console.log(`SocketId = ${socket.id} joined the chatId = ${chatId}`)
         }
 
         catch(error) {
@@ -122,11 +125,11 @@ io.on("connection", (socket) => {
     })
     socket.on("LeaveChat",(chatId)=>{
         socket.leave(chatId);
-        console.log(`SocketId = ${socket.id} leaved the chatId = ${chatId}`)
+        // console.log(`SocketId = ${socket.id} leaved the chatId = ${chatId}`)
     })
 
     socket.on("disconnect",()=>{
-        console.log("User disconnected:", socket.id);
+        // console.log("User disconnected:", socket.userId);
     })
 });
 

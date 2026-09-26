@@ -166,17 +166,16 @@ async function postChatMessage(req, res) {
     const io = req.app.get("io");
     io.to(chatId).emit("newMessage", newChatMessage);
 
-
+    // Check whether the receiver is currently viewing this chat; only send a global notification if they are not.
     const sockets = await io.in(chatId).fetchSockets()
     let receiverIsInChat = false
     for(let i = 0;i<sockets.length;i++) {
-      if(sockets[i].userId==newReceiver) receiverIsInChat = true;
+      if(sockets[i].userId.toString()===newReceiver.toString()) receiverIsInChat = true;
     }
-
-    // todo needs modification :
-    // update the receiver hasUnreadMessage to true :
-    await User.findByIdAndUpdate(newReceiver,{$set : {hasUnreadMessage : true}});
-
+    if(receiverIsInChat==false) {
+      await User.findByIdAndUpdate(newReceiver,{$set : {hasUnreadMessage : true}});
+      io.to(newReceiver.toString()).emit("newGlobalNotification",{hasUnreadMessage : true});
+    }
 
     return res.status(201).json(newChatMessage);
   } catch (error) {
