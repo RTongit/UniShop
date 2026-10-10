@@ -55,9 +55,13 @@ const userSchema = new mongoose.Schema(
             enum: ["pending", "verified", "rejected"],
             default : "verified"
         },
-        hasUnreadMessage : {
-            type : Boolean,
-            default : false
+        // hasUnreadMessage : {
+        //     type : Boolean,
+        //     default : false
+        // }
+        unreadChatCount : {
+            type : Number,
+            default : 0
         }
     },
 

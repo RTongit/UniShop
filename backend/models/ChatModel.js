@@ -15,7 +15,15 @@ const ChatSchema = new mongoose.Schema(
             type : mongoose.Schema.Types.ObjectId,
             ref : "Item",
             required : true
-        }
+        },
+        buyerHasUnreadMessage: {
+            type: Boolean,
+            default: false
+        },
+        sellerHasUnreadMessage: {
+            type: Boolean,
+            default: false
+        },
     },
 
     {

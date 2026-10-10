@@ -11,14 +11,14 @@ export default function Navbar() {
   let [item, setItem] = useState("");
   const router = useRouter();
   const { authUser,logout,socket } = useAuthStore();
-  const [hasUnreadMessage, setHasUnreadMessage] = useState(false);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
   const {getNotificationStatus,updateNotificationStatus} = useChatStore()
 
   useEffect(()=>{
     async function fetchData() {
       const response = await getNotificationStatus()
       if(response==null) return;
-      setHasUnreadMessage(response.hasUnreadMessage);
+      setUnreadChatCount(response.unreadChatCount);
     }
     fetchData();
   },
@@ -30,7 +30,7 @@ export default function Navbar() {
       if(!socket) return
       const handleGlobalNotification = (message) => {
         console.log("🔥 RECEIVED:", message);
-        setHasUnreadMessage(message.hasUnreadMessage);
+        setUnreadChatCount(message.unreadChatCount);
       };
       socket.on("newGlobalNotification", handleGlobalNotification);
 
@@ -76,15 +76,10 @@ export default function Navbar() {
 
               {authUser ? (
                 <Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
-                 onClick={async ()=>{
-                  const response = await updateNotificationStatus();
-                  if(response==null) return
-                  setHasUnreadMessage(response.hasUnreadMessage)
-                 }}
                  >
                  <MessageCircle />
 
-                  {hasUnreadMessage==true ? 
+                  {unreadChatCount>0 ? 
                     (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-[#DC143C]" />)
                      : 
                     null
@@ -136,15 +131,9 @@ export default function Navbar() {
 
             {authUser ? 
             (<Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
-              onClick={async ()=>{
-                const response = await updateNotificationStatus();
-                if(response==null) return
-                setHasUnreadMessage(response.hasUnreadMessage)
-                }
-              }
               >
               <MessageCircle />
-              {hasUnreadMessage==true ? 
+              {unreadChatCount>0 ? 
                (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-[#DC143C]" />)
                 : 
                null

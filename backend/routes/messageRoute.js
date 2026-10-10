@@ -1,5 +1,5 @@
 import express from "express"
-import { getChatMessages, getChats, getNotificationStatus, postChat, postChatMessage, updateNotificationStatus } from "../controllers/messageController.js";
+import { getChatMessages, getChats, getNotificationStatus, postChat, postChatMessage, updateGlobalNotificationStatus,updateChatNotificationStatus } from "../controllers/messageController.js";
 import protectRoute from "../middleware/protectRoute.js";
 
 const messageRouter = express.Router();
@@ -19,8 +19,11 @@ messageRouter.get('/:chatId/messages',protectRoute,getChatMessages)
 // get Notification in the navbar message icon : 
 messageRouter.get('/users/notification-status',protectRoute,getNotificationStatus)
 
-// set notification 
-messageRouter.patch('/users/update-notification-status',protectRoute,updateNotificationStatus)
+// update global notification 
+messageRouter.patch('/users/update-notification-status',protectRoute,updateGlobalNotificationStatus)
+
+// update Chat notification
+messageRouter.patch('/users/update-chat-notification-status/:chatId', protectRoute, updateChatNotificationStatus);
 
 
 export default messageRouter;
