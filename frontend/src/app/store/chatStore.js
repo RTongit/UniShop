@@ -11,7 +11,22 @@ export const useChatStore = create((set,get)=>({
         set({selectedChat : data})
     },
 
+    unreadChatCount : 0,
+    setUnreadChatCount : function (val) { set({unreadChatCount : val})},
+
     myChats : [],
+    setMyChats : function (targetId,isBuyer) { 
+        set((state)=>(
+            {
+                // always remember map returns a new array not reference to already existing array 
+                myChats : state.myChats.map((chat)=>{
+                    if(chat._id!=targetId) return {...chat}
+                    if (isBuyer) return {...chat, buyerHasUnreadMessage: false}
+                    return {...chat,sellerHasUnreadMessage: false}
+                }),
+            }
+        ))
+    },
     isChatsLoading : true,
     getChats : async function() {
         set({myChats : []});
@@ -138,10 +153,10 @@ export const useChatStore = create((set,get)=>({
         socket.off("newMessage");
     },
 
-    getNotificationStatus : async function() {
+    getGlobalNotificationStatus : async function() {
         try {
             const res = await fetch(
-                `${BACKEND_URL}/api/chat/users/notification-status`,
+                `${BACKEND_URL}/api/chat/users/global-notification-status`,
                 {
                     credentials : "include",
                     cache : "no-store"
@@ -151,19 +166,21 @@ export const useChatStore = create((set,get)=>({
             if(!res.ok) {
                 throw new Error(response.message)
             }
+            set({unreadChatCount : response.unreadChatCount})
             return response
         }
 
         catch(error) {
             toast.error(error.message)
+            console.log("Problem here")
             return null
         }
     },
 
-    updateNotificationStatus : async function() {
+    markChatAsRead : async function(chatId) {
         try {
             const res = await fetch(
-                `${BACKEND_URL}/api/chat/users/update-notification-status`,
+                `${BACKEND_URL}/api/chat/users/update-chat-notification-status/${chatId}`,
                 {
                     method : "PATCH",
                     headers : {'Content-Type': 'application/json'},
@@ -175,12 +192,11 @@ export const useChatStore = create((set,get)=>({
             if(!res.ok) {
                 throw new Error(response.message)
             }
-            return response
+            set({unreadChatCount : response.unreadChatCount})
         }
 
         catch(error) {
             toast.error(error.message)
-            return null
         }
     },
     

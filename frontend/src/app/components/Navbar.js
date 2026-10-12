@@ -11,18 +11,15 @@ export default function Navbar() {
   let [item, setItem] = useState("");
   const router = useRouter();
   const { authUser,logout,socket } = useAuthStore();
-  const [unreadChatCount, setUnreadChatCount] = useState(0);
-  const {getNotificationStatus,updateNotificationStatus} = useChatStore()
+  const {getGlobalNotificationStatus,unreadChatCount,setUnreadChatCount} = useChatStore()
 
   useEffect(()=>{
     async function fetchData() {
-      const response = await getNotificationStatus()
-      if(response==null) return;
-      setUnreadChatCount(response.unreadChatCount);
+      await getGlobalNotificationStatus()
     }
     fetchData();
   },
-  [getNotificationStatus])
+  [getGlobalNotificationStatus])
 
   // It listens for global notification event named = newGlobalNotification
   useEffect(
@@ -39,7 +36,7 @@ export default function Navbar() {
         socket.off("newGlobalNotification", handleGlobalNotification);
       }
     },
-    [socket]
+    [socket,setUnreadChatCount]
   )
 
   function handleSubmit(e) {

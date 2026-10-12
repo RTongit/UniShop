@@ -84,7 +84,6 @@ async function getChats(req, res) {
       .populate("seller", "name profilePic")
       .populate("item", "title")
       .lean();
-    
 
     await Promise.all(
       chats.map(async (chat) => {
@@ -102,7 +101,7 @@ async function getChats(req, res) {
             return res.status(500).json({ message: "Internal Server Error" });
           }
         }
-        return await fetchData();;
+        return await fetchData();
       }),
     );
 
@@ -162,46 +161,53 @@ async function postChatMessage(req, res) {
       { path: "sender", select: "name profilePic" },
     ]);
 
-
     const io = req.app.get("io");
     io.to(chatId).emit("newMessage", newChatMessage);
 
     // Check whether the receiver is currently viewing this chat; only send a global notification if they are not.
-    const sockets = await io.in(chatId).fetchSockets()
-    let receiverIsInChat = false
-    for(let i = 0;i<sockets.length;i++) {
-      if(sockets[i].userId.toString()===newReceiver.toString()) receiverIsInChat = true;
+    const sockets = await io.in(chatId).fetchSockets();
+    let receiverIsInChat = false;
+    for (let i = 0; i < sockets.length; i++) {
+      if (sockets[i].userId.toString() === newReceiver.toString())
+        receiverIsInChat = true;
     }
 
-    if(receiverIsInChat==false) {
-      // If receiver is buyer : 
-      if(newReceiver==existingChat.buyer) {
-        if(existingChat.buyerHasUnreadMessage==false) {
+    if (receiverIsInChat == false) {
+      // If receiver is buyer :
+      if (newReceiver == existingChat.buyer) {
+        if (existingChat.buyerHasUnreadMessage == false) {
           const user = await User.findByIdAndUpdate(
             newReceiver,
-            {$inc : {unreadChatCount : 1}},
-            { returnDocument: "after" }
-          )
-          await Chat.findByIdAndUpdate(existingChat._id,{$set : {buyerHasUnreadMessage : true}})
-          io.to(newReceiver.toString()).emit("newGlobalNotification",{unreadChatCount : user.unreadChatCount});
+            { $inc: { unreadChatCount: 1 } },
+            { returnDocument: "after" },
+          );
+          await Chat.findByIdAndUpdate(existingChat._id, {
+            $set: { buyerHasUnreadMessage: true },
+          });
+          io.to(newReceiver.toString()).emit("newGlobalNotification", {
+            unreadChatCount: user.unreadChatCount,
+          });
 
           // io.to(newReceiver.toString()).emit("newChatNotification",{unreadChatCount : user.unreadChatCount});
         }
       }
 
-      // If receiver is seller : 
-      else if(newReceiver==existingChat.seller) {
-        if(existingChat.sellerHasUnreadMessage==false) {
+      // If receiver is seller :
+      else if (newReceiver == existingChat.seller) {
+        if (existingChat.sellerHasUnreadMessage == false) {
           const user = await User.findByIdAndUpdate(
             newReceiver,
-            {$inc : {unreadChatCount : 1}},
-            { returnDocument: "after" }
-          )
-          await Chat.findByIdAndUpdate(existingChat._id,{$set : {sellerHasUnreadMessage : true}})
-          io.to(newReceiver.toString()).emit("newGlobalNotification",{unreadChatCount : user.unreadChatCount});
+            { $inc: { unreadChatCount: 1 } },
+            { returnDocument: "after" },
+          );
+          await Chat.findByIdAndUpdate(existingChat._id, {
+            $set: { sellerHasUnreadMessage: true },
+          });
+          io.to(newReceiver.toString()).emit("newGlobalNotification", {
+            unreadChatCount: user.unreadChatCount,
+          });
         }
-      };
-
+      }
     }
 
     return res.status(201).json(newChatMessage);
@@ -241,57 +247,109 @@ async function getChatMessages(req, res) {
   }
 }
 
-async function getNotificationStatus(req,res) {
+async function getGlobalNotificationStatus(req, res) {
   const LoggedUser = req.AuthUser.userId;
   try {
-    const user = await User.findOne({_id : LoggedUser}).select({unreadChatCount : 1})
-    return res.status(200).json({unreadChatCount : user.unreadChatCount})
-  }
-
-  catch(error) {
+    const user = await User.findOne({ _id: LoggedUser }).select({
+      unreadChatCount: 1,
+    });
+    return res.status(200).json({ unreadChatCount: user.unreadChatCount });
+  } catch (error) {
     console.log(`Error in getNotificationStatus controller : ${error.message}`);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-async function updateGlobalNotificationStatus(req,res) {
+async function markChatAsRead(req, res) {
   const LoggedUser = req.AuthUser.userId;
+  const chatId = req.params.chatId;
   try {
-    const user = await User.findByIdAndUpdate(
-      {_id : LoggedUser},
-      {$set : {hasUnreadMessage : false}},
-      {returnDocument : "after"}
-    )
-    .select({unreadChatCount : 1})
-    return res.status(200).json({unreadChatCount : user.unreadChatCount})
-  }
+    if (!chatId)
+      return res.status(400).json({ message: "ChatId is not defined" });
 
-  catch(error) {
-    console.log(`Error in updateNotificationStatus controller : ${error.message}`);
+    // check the format of id :
+    if (!isValidObjectId(chatId))
+      return res.status(400).json({ message: "Invalid objectId format" });
+
+    // check if the chat exist or not:
+    const existingChat = await Chat.findOne({
+      _id: chatId,
+      $or: [{ buyer: LoggedUser }, { seller: LoggedUser }],
+    });
+    if (!existingChat) {
+      return res.status(404).json({ message: "Chat does not exist" });
+    }
+
+    // If loggedUser is buyer:
+    if (LoggedUser == existingChat.buyer) {
+      let updatedUser;
+
+      if (existingChat.buyerHasUnreadMessage == true) {
+        let updatedChat = await Chat.findOneAndUpdate(
+          {
+            _id: existingChat._id,
+            buyerHasUnreadMessage: true,
+          },
+          { $set: { buyerHasUnreadMessage: false } },
+          { returnDocument: "after" },
+        );
+
+        if (updatedChat) {
+          updatedUser = await User.findByIdAndUpdate(
+            LoggedUser,
+            { $inc: { unreadChatCount: -1 } },
+            { returnDocument: "after" },
+          ).select("unreadChatCount");
+        } else {
+          updatedUser =
+            await User.findById(LoggedUser).select("unreadChatCount");
+        }
+      } else {
+        updatedUser = await User.findById(LoggedUser).select("unreadChatCount");
+      }
+
+      return res.status(200).json({
+        unreadChatCount: updatedUser?.unreadChatCount ?? 0,
+      });
+    }
+
+    // If loggedUser is seller :
+    else if (LoggedUser == existingChat.seller) {
+      let updatedUser;
+      // If it has unreadMessage
+      if (existingChat.sellerHasUnreadMessage == true) {
+        let updatedChat = await Chat.findByIdAndUpdate(
+          { _id: existingChat._id, sellerHasUnreadMessage: true },
+          { $set: { sellerHasUnreadMessage: false } },
+        );
+
+        if (updatedChat) {
+          updatedUser = await User.findByIdAndUpdate(
+            LoggedUser,
+            { $inc: { unreadChatCount: -1 } },
+            { returnDocument: "after" },
+          );
+        } else
+          updatedUser =
+            await User.findById(LoggedUser).select("unreadChatCount");
+      } else
+        updatedUser = await User.findById(LoggedUser).select("unreadChatCount");
+      return res.status(200).json({
+        unreadChatCount: updatedUser?.unreadChatCount ?? 0,
+      });
+    }
+    
+  } catch (error) {
+    console.log(`Error in markChatAsRead controller : ${error.message}`);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-async function updateChatNotificationStatus(req,res) {
-    const LoggedUser = req.AuthUser.userId;
-    const chatId = req.params.chatId;
-    try {
-      // check if the chat exist or not:
-      const existingChat = await Chat.findOne({
-        _id: chatId,
-        $or: [{ buyer: LoggedUser }, { seller: LoggedUser }],
-      });
-      if (!existingChat) {return res.status(404).json({ message: "Chat does not exist" });}
-      
-      // update the chat 
-
-    }
-
-
-    catch(error) {
-      console.log(`Error in updateChatNotificationStatus controller : ${error.message}`);
-      return res.status(500).json({ message: "Internal Server Error" });
-    }
-}
-
-export { getChats, getChatMessages, postChat, postChatMessage,getNotificationStatus,updateGlobalNotificationStatus,updateChatNotificationStatus };
+export {
+  getChats,
+  getChatMessages,
+  postChat,
+  postChatMessage,
+  getGlobalNotificationStatus,
+  markChatAsRead,
+};

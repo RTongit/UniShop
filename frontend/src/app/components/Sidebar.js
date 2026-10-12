@@ -4,23 +4,28 @@ import { useChatStore } from "../store/chatStore.js";
 import { useAuthStore } from "../store/authStore.js";
 import { useEffect, useState } from "react";
 import formatDate from "../constant/formatDate.js";
+import { useRouter } from "next/navigation.js";
 
 export default function SideBar() {
-  const { myChats, selectedChat, setSelectedChat } = useChatStore();
+  const { myChats, setMyChats, selectedChat, setSelectedChat,markChatAsRead } = useChatStore();
   const { authUser} = useAuthStore();
-  const [messageDot, setMessageDot] = useState(true)
-
+  const router = useRouter()
   return (
     <div className="flex flex-col px-2 gap-y-3 w-full h-full bg-white py-2">
       {myChats.map((chat, i) => (
-        <Link
+        <button
           key={i}
-          onClick={() => {
+          onClick={async () => {
             setSelectedChat(chat);
-            
+            const isBuyer = (authUser.userId.toString()==chat.buyer._id.toString()) ? true : false;
+            if((authUser.userId==chat.buyer._id.toString() && chat.buyerHasUnreadMessage==true) || (authUser.userId==chat.seller._id.toString() && chat.sellerHasUnreadMessage==true)) {
+              setMyChats(chat._id,isBuyer)
+              await markChatAsRead(chat._id);
+            }
+            router.push(`/chat/${chat._id}`);
+
           }}
           className={`${(selectedChat && (selectedChat._id == chat._id)) ? "bg-stone-200 rounded-xl" : "bg-white"} py-3 px-2 hover:bg-stone-200 hover:rounded-xl`}
-          href={`/chat/${chat._id}`}
         >
           <div className="flex justify-between">
 
@@ -70,16 +75,15 @@ export default function SideBar() {
               : null}
               
               {/* New message dot */}
+              {/* If authUser is buyer */}
               {(authUser.userId==chat.buyer._id.toString() && chat.buyerHasUnreadMessage==true) ? <span className="h-2.5 w-2.5 rounded-full bg-blue-600 shrink-0" /> : null}
+              {/* If authUser is seller */}
               {(authUser.userId==chat.seller._id.toString() && chat.sellerHasUnreadMessage==true) ? <span className="h-2.5 w-2.5 rounded-full bg-blue-600 shrink-0" /> : null}
             </div>
 
           </div>
-        </Link>
+        </button>
       ))}
-
-      {console.log(myChats[1])}
-      {console.log(authUser)}
 
     </div>
   );
