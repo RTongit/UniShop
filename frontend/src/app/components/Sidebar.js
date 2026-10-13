@@ -7,9 +7,23 @@ import formatDate from "../constant/formatDate.js";
 import { useRouter } from "next/navigation.js";
 
 export default function SideBar() {
-  const { myChats, setMyChats, selectedChat, setSelectedChat,markChatAsRead } = useChatStore();
-  const { authUser} = useAuthStore();
+  const { myChats, setMyChats, unsetMyChats, selectedChat, setSelectedChat,markChatAsRead } = useChatStore();
+  const { authUser,socket} = useAuthStore();
   const router = useRouter()
+
+  useEffect(()=>{
+    if(!socket) return;
+    function handleChatNotification(message) {
+      const chat = message.chat
+      const isBuyer = (authUser.userId.toString()==chat.buyer.toString()) ? true : false;
+      setMyChats(chat._id.toString(),isBuyer)
+    }
+
+    socket.on("newChatNotification",handleChatNotification);
+
+    return ()=>{socket.off("newChatNotification",handleChatNotification)}
+  },[socket,setMyChats,authUser])
+
   return (
     <div className="flex flex-col px-2 gap-y-3 w-full h-full bg-white py-2">
       {myChats.map((chat, i) => (
@@ -19,7 +33,7 @@ export default function SideBar() {
             setSelectedChat(chat);
             const isBuyer = (authUser.userId.toString()==chat.buyer._id.toString()) ? true : false;
             if((authUser.userId==chat.buyer._id.toString() && chat.buyerHasUnreadMessage==true) || (authUser.userId==chat.seller._id.toString() && chat.sellerHasUnreadMessage==true)) {
-              setMyChats(chat._id,isBuyer)
+              unsetMyChats(chat._id,isBuyer)
               await markChatAsRead(chat._id);
             }
             router.push(`/chat/${chat._id}`);
@@ -46,16 +60,16 @@ export default function SideBar() {
               </div>
 
               {/* User info */}
-              <div className="flex flex-col gap-y-2">
+              <div className="flex flex-col gap-y-2 items-start">
                 <span className="font-medium">
                   {authUser.userId === chat.buyer._id.toString()
                     ? 
-                    (<div className="flex flex-col gap-y-1">
+                    (<div className="flex flex-col gap-y-1 items-start">
                       <span>{chat.seller.name}</span>
                       <span className="text-sm text-gray-500">Seller</span>
                     </div>)
                     : 
-                    (<div className="flex flex-col gap-y-1">
+                    (<div className="flex flex-col gap-y-1 items-start">
                       <span>{chat.buyer.name}</span>
                       <span className="text-sm text-gray-500">Buyer</span>
                     </div>)

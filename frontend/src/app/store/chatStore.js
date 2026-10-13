@@ -15,7 +15,19 @@ export const useChatStore = create((set,get)=>({
     setUnreadChatCount : function (val) { set({unreadChatCount : val})},
 
     myChats : [],
-    setMyChats : function (targetId,isBuyer) { 
+    setMyChats : function (targetId,isBuyer) {
+        set((state)=>(
+            {
+                // always remember map returns a new array not reference to already existing array 
+                myChats : state.myChats.map((chat)=>{
+                    if(chat._id.toString()!=targetId.toString()) return {...chat}
+                    if (isBuyer) return {...chat, buyerHasUnreadMessage: true}
+                    return {...chat,sellerHasUnreadMessage: true}
+                }),
+            }
+        ))
+    },
+    unsetMyChats : function (targetId,isBuyer) { 
         set((state)=>(
             {
                 // always remember map returns a new array not reference to already existing array 

@@ -188,8 +188,11 @@ async function postChatMessage(req, res) {
             unreadChatCount: user.unreadChatCount,
           });
 
-          // io.to(newReceiver.toString()).emit("newChatNotification",{unreadChatCount : user.unreadChatCount});
+          io.to(newReceiver.toString()).emit("newChatNotification", {
+            chat : existingChat
+          });
         }
+        
       }
 
       // If receiver is seller :
@@ -206,9 +209,14 @@ async function postChatMessage(req, res) {
           io.to(newReceiver.toString()).emit("newGlobalNotification", {
             unreadChatCount: user.unreadChatCount,
           });
+          
+          io.to(newReceiver.toString()).emit("newChatNotification", {
+            chat : existingChat
+          });
         }
       }
     }
+
 
     return res.status(201).json(newChatMessage);
   } catch (error) {
