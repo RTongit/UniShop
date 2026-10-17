@@ -326,7 +326,7 @@ async function markChatAsRead(req, res) {
       let updatedUser;
       // If it has unreadMessage
       if (existingChat.sellerHasUnreadMessage == true) {
-        let updatedChat = await Chat.findByIdAndUpdate(
+        let updatedChat = await Chat.findOneAndUpdate(
           { _id: existingChat._id, sellerHasUnreadMessage: true },
           { $set: { sellerHasUnreadMessage: false } },
         );

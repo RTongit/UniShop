@@ -39,12 +39,12 @@ export default function SideBar() {
             router.push(`/chat/${chat._id}`);
 
           }}
-          className={`${(selectedChat && (selectedChat._id == chat._id)) ? "bg-stone-200 rounded-xl" : "bg-white"} py-3 px-2 hover:bg-stone-200 hover:rounded-xl`}
+          className={`border-b border-gray-300 ${(selectedChat && (selectedChat._id == chat._id)) ? "bg-stone-200 rounded-xl" : "bg-white"} py-3 px-2 hover:bg-stone-200 hover:rounded-xl`}
         >
           <div className="flex justify-between">
 
             {/*Left Section*/}
-            <div className="flex gap-x-3">
+            <div className="flex gap-x-3">  
               {/* Profile Pic */}
               <div className="size-10 bg-amber-800 rounded-full overflow-hidden">
                 <img
@@ -75,7 +75,7 @@ export default function SideBar() {
                     </div>)
                   }
                 </span>
-                <span className="text-sm">{chat.item.title}</span>
+                <span className="text-sm text-start">{chat.item.title}</span>
               </div>
 
             </div>
@@ -90,9 +90,9 @@ export default function SideBar() {
               
               {/* New message dot */}
               {/* If authUser is buyer */}
-              {(authUser.userId==chat.buyer._id.toString() && chat.buyerHasUnreadMessage==true) ? <span className="h-2.5 w-2.5 rounded-full bg-blue-600 shrink-0" /> : null}
+              {(authUser.userId==chat.buyer._id.toString() && chat.buyerHasUnreadMessage==true) ? <span className="h-2.5 w-2.5 rounded-full bg-[#DC143C] shrink-0" /> : null}
               {/* If authUser is seller */}
-              {(authUser.userId==chat.seller._id.toString() && chat.sellerHasUnreadMessage==true) ? <span className="h-2.5 w-2.5 rounded-full bg-blue-600 shrink-0" /> : null}
+              {(authUser.userId==chat.seller._id.toString() && chat.sellerHasUnreadMessage==true) ? <span className="h-2.5 w-2.5 rounded-full bg-[#DC143C] shrink-0" /> : null}
             </div>
 
           </div>
