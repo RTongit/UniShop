@@ -52,7 +52,7 @@ export default function ProfileDropdown() {
 
       {/* Dropdown */}
       {open && (
-        <div className="fixed right-5 lg:top-20 top-35 w-64 bg-[#1a1a1a] rounded-2xl shadow-2xl z-50 overflow-hidden border border-white/10">
+        <div className="fixed right-5 lg:top-20 top-35 w-64 bg-[#1a1a1a] rounded-2xl shadow-2xl z-150 overflow-hidden border border-white/10">
 
           {/* Menu items */}
           <div className="p-2 space-y-0.5">

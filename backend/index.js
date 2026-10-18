@@ -11,6 +11,7 @@ import {Server} from "socket.io"
 import Chat from './models/ChatModel.js';
 import User from './models/UserModel.js';
 import jwt from "jsonwebtoken"
+import adminRouter from './routes/adminRoute.js';
 
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(cookieParser())
 app.use('/api/auth',authRouter);
 app.use('/api/items',itemRouter)
 app.use('/api/chat',messageRouter)
+app.use('/api/admin', adminRouter)
 
 app.get('/',(req,res)=>{
     res.status(200).json({"message" : "Welcome to Unishop HomePage"});

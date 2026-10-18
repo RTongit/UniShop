@@ -60,7 +60,7 @@ export default function AdminVerificationPage() {
   return (
     <main className="h-full overflow-y-auto bg-slate-50 px-5 py-6 md:px-10">
       <div className="mx-auto max-w-7xl">
-        <nav aria-label="Filter students" className="sticky top-0 z-20 mb-7 flex flex-wrap items-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+        <nav aria-label="Filter students" className="sticky top-0 z-0 mb-7 flex flex-wrap items-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
           {FILTERS.map((filter) => (
             <button
               key={filter}

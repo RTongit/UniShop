@@ -16,12 +16,13 @@ export default async function protectRoute(req,res,next) {
 
         if(payloadObj) {
             req.AuthUser = payloadObj;
+            req.role = existingUser.role 
             next();
         };
     }
 
     catch(error) {
-        console.log(`Error in protectRoute : ${error.message}`);
+        console.log(`Error in protectRoute middleware : ${error.message}`);
         return res.status(401).json({message: "Unauthorized - Invalid or expired token" });
     }
 }
