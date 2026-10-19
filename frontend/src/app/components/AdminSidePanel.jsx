@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const AdminSidePanel = () => {
+const AdminSidePanel = ({ onNavigate }) => {
   const pathName = usePathname()
   const section = pathName.split("/").filter(Boolean)[1]
   const [activeSection, setActiveSection] = useState(section)
@@ -15,7 +15,7 @@ const AdminSidePanel = () => {
       {/* Dashboard */}
       <Link href="/admin/dashboard" 
         className={`flex gap-x-2 ${activeSection==="dashboard" ? "bg-black text-white" : "bg-white text-black"}  px-3 py-5 font-medium`}
-        onClick={()=>{setActiveSection("dashboard")}}
+        onClick={()=>{setActiveSection("dashboard"); onNavigate?.()}}
         >
         <LayoutDashboard size={20} />
         <span>Dashboard</span>
@@ -24,7 +24,7 @@ const AdminSidePanel = () => {
       {/* Verification */}
       <Link href="/admin/verification" 
          className={`flex gap-x-2 ${activeSection==="verification" ? "bg-black text-white" : "bg-white text-black"}  px-3 py-5 font-medium`}
-        onClick={()=>{setActiveSection("verification")}}
+        onClick={()=>{setActiveSection("verification"); onNavigate?.()}}
         >
         <ShieldCheck size={20} />
         <span>Verification</span>
@@ -33,7 +33,7 @@ const AdminSidePanel = () => {
       {/* Students */}
       <Link href="/admin/students" 
          className={`flex gap-x-2 ${activeSection==="students" ? "bg-black text-white" : "bg-white text-black"}  px-3 py-5 font-medium`}
-         onClick={()=>{setActiveSection("students")}}
+         onClick={()=>{setActiveSection("students"); onNavigate?.()}}
         >
         <Users size={20} />
         <span>Students</span>
@@ -42,7 +42,7 @@ const AdminSidePanel = () => {
       {/* Listings */}
       <Link href="/admin/listings" 
          className={`flex gap-x-2 ${activeSection==="listings" ? "bg-black text-white" : "bg-white text-black"}  px-3 py-5 font-medium`}
-         onClick={()=>{setActiveSection("Listings")}}
+         onClick={()=>{setActiveSection("Listings"); onNavigate?.()}}
         >
         <ShoppingBag size={20} />
         <span>Listings</span>

@@ -55,7 +55,7 @@ const userSchema = new mongoose.Schema(
             enum: ["pending", "verified", "rejected"],
             default : "pending"
         },
-        verificationRejectionReason: {
+        rejectionReason: {
             type: String,
             default: "",
             maxlength: 500,

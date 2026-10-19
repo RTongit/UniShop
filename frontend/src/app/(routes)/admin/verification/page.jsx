@@ -2,78 +2,174 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { X,Check } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/app/store/authStore";
+import Spinner from "@/app/components/Spinner";
+import formatDate from "@/app/constant/formatDate";
 
-const FILTERS = ["Pending", "Verified", "Rejected", "All students"];
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const SAMPLE_STUDENTS = [
-  {id: "student-1", name: "Priya Sharma", email: "priya@gmail.com", enrollmentId: "23CSE132", department: "Computer Science & Engineering", graduationYear: 2028, phoneNumber: "1234567894", submittedAt: "7 Sept 2026", status: "Pending", rejectionReason: ""},
-  {id: "student-2", name: "Ankit Sharma", email: "ankit@gmail.com", enrollmentId: "23CSE121", department: "Mechanical Engineering", graduationYear: 2028, phoneNumber: "7894571230", submittedAt: "7 Sept 2026", status: "Pending", rejectionReason: ""},
-  {id: "student-3", name: "Nayan Das", email: "nayan@gmail.com", enrollmentId: "23CSE117", department: "Information Technology", graduationYear: 2024, phoneNumber: "7845123265", submittedAt: "7 Sept 2026", status: "Pending", rejectionReason: ""},
-  {id: "student-4", name: "Rohit Sharma", email: "rohit67@gmail.com", enrollmentId: "49", department: "Civil Engineering", graduationYear: 2025, phoneNumber: "7845123245", submittedAt: "6 Sept 2026", status: "Verified", rejectionReason: ""},
-  {id: "student-5", name: "Rohan Tamuli", email: "rohantamuli27@gmail.com", enrollmentId: "50", department: "Computer Science & Engineering", graduationYear: 2027, phoneNumber: "8753978414", submittedAt: "28 Aug 2026", status: "Verified", rejectionReason: ""},
-  {id: "student-6", name: "Gaurav Saikia", email: "gaurav67@gmail.com", enrollmentId: "52", department: "Computer Science & Engineering", graduationYear: 2027, phoneNumber: "8753978415", submittedAt: "23 Aug 2026", status: "Verified", rejectionReason: ""},
-  {id: "student-7", name: "Meera Bora", email: "meera.bora@gmail.com", enrollmentId: "23ECE088", department: "Electronics & Communication", graduationYear: 2026, phoneNumber: "9864123456", submittedAt: "20 Aug 2026", status: "Rejected", rejectionReason: "Please upload a clearer enrollment document."},
-];
+const FILTERS = ["pending", "verified", "rejected", "All students"];
 
-function StatusBadge({status}) {
+
+//Small reusable component that styles a student's status
+function StatusBadge({ status }) {
   const styles = {
-    Pending: "bg-amber-100 text-amber-800",
-    Verified: "bg-emerald-100 text-emerald-700",
-    Rejected: "bg-rose-100 text-rose-700",
+    pending: "bg-stone-50 text-amber-800",
+    verified: "bg-stone-50 text-emerald-700",
+    rejected: "bg-stone-50 text-rose-700",
   };
 
-  return <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${styles[status]}`}>{status}</span>;
+  const Icon =
+    status === "verified" ? Check :
+    status === "rejected" ? X :
+    null;
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${styles[status]}`}>
+      {Icon && <Icon size={14} strokeWidth={2.5} aria-hidden="true" />}
+      {status}
+    </span>
+  );
 }
 
 export default function AdminVerificationPage() {
   const {authUser} = useAuthStore();
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState("All students");
-  const [students, setStudents] = useState(SAMPLE_STUDENTS);
+  const [students, setStudents] = useState([]);
   const [studentToReject, setStudentToReject] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
 
+  const [isFetchingData, setIsFetchingData] = useState(true);
+
   useEffect(() => {
-    if(!authUser) router.replace("/login");
-    else if(authUser.role !== "admin") router.replace("/");
+    if(!authUser) {router.replace("/login"); return;}
+    if(authUser.role !== "admin") router.replace("/");
+    async function getVerificationRequests() {
+      setIsFetchingData(true)
+      try {
+        const res = await fetch(
+          `${BACKEND_URL}/api/admin/verification-requests`,{credentials : "include",cache : "no-store"}
+        )
+        const response = await res.json()
+        if(!res.ok) throw new Error(response.message)
+        setStudents(response)
+      }
+
+      catch(error) {
+        toast.error(error.message)
+      }
+
+      finally {
+        setIsFetchingData(false)
+      }
+    }
+    getVerificationRequests()
   }, [authUser, router]);
 
   const visibleStudents = useMemo(() => {
     if(activeFilter === "All students") return students;
-    return students.filter((student) => student.status === activeFilter);
+    return students.filter((student) => student.verificationStatus === activeFilter);
   }, [activeFilter, students]);
 
-  if(!authUser || authUser.role !== "admin") return null;
+  // Update a student's status in local React state
+  async function updateStudentStatus(studentId, verificationStatus, rejectionReason = "") {
+    try {
+       const res = await fetch(`${BACKEND_URL}/api/admin/verification-requests/${studentId}`,
+         {
+           method: "PATCH",
+           headers: { "Content-Type": "application/json" },
+           credentials: "include",
+           body: JSON.stringify({ verificationStatus, rejectionReason }),
+         }
+       )
+       const response = await res.json()
+       if(!res.ok) throw new Error(response.message)
 
-  function updateStudentStatus(studentId, status, reason = "") {
-    setStudents((currentStudents) => currentStudents.map((student) =>
-      student.id === studentId ? {...student, status, rejectionReason: reason} : student
-    ));
-    setStudentToReject(null);
-    setRejectionReason("");
-    toast.success(status === "Verified" ? "Student approved" : "Student rejected");
+       // Only update the student state if it returned good response from backend  
+       setStudents((prev)=> prev.map((student)=> student._id === response._id ? response : student))
+       setStudentToReject(null);
+       setRejectionReason("");
+       toast.success(verificationStatus === "verified" ? "Student approved" : "Student rejected");
+    }
+    catch(error) {
+        toast.error(error.message)
+    }
   }
 
+  if(!authUser || authUser.role !== "admin") return null;
+  if(isFetchingData) return <Spinner/>
+
   return (
-    <main className="h-full overflow-y-auto bg-slate-50 px-5 py-6 md:px-10">
+    <main className="h-full overflow-y-auto bg-slate-50 px-3 py-4 sm:px-5 sm:py-6 md:px-10">
       <div className="mx-auto max-w-7xl">
-        <nav aria-label="Filter students" className="sticky top-0 z-0 mb-7 flex flex-wrap items-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+        <nav aria-label="Filter students" className="sticky top-0 z-0 -mx-3 mb-5 flex flex-nowrap items-center gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-sm sm:mx-0 sm:mb-7">
           {FILTERS.map((filter) => (
             <button
               key={filter}
               type="button"
               onClick={() => setActiveFilter(filter)}
-              className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors sm:px-6 ${activeFilter === filter ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"}`}
+              className={`shrink-0 whitespace-nowrap rounded-xl px-4 py-3 text-sm font-medium transition-colors sm:px-6 ${activeFilter === filter ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"}`}
             >
-              {filter}
+              {filter.toUpperCase()}
             </button>
           ))}
         </nav>
 
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        {/* Compact student cards for screens where the full table would be clipped. */}
+        <section className="space-y-3 2xl:hidden" aria-label="Student verification requests">
+          {visibleStudents.map((student) => (
+            <article key={student._id} className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="break-words font-semibold text-slate-950">{student.name}</h2>
+                  <p className="mt-1 break-all text-sm text-slate-600">{student.email}</p>
+                  <p className="mt-1 break-words text-sm text-slate-400">{student.phoneNumber}</p>
+                </div>
+                <div className="shrink-0"><StatusBadge status={student.verificationStatus} /></div>
+              </div>
+
+              <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-slate-100 pt-5 text-sm sm:gap-x-6">
+                <div className="min-w-0">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Enrollment</dt>
+                  <dd className="mt-1 break-words font-medium text-slate-800">{student.enrollmentId || "—"}</dd>
+                </div>
+                <div className="min-w-0">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Submitted</dt>
+                  <dd className="mt-1 text-slate-700">{formatDate(student.createdAt)}</dd>
+                </div>
+                <div className="col-span-2 min-w-0">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Academic details</dt>
+                  <dd className="mt-1 break-words text-slate-700">{student.department || "—"}</dd>
+                  <dd className="mt-1 text-slate-400">Graduation {student.graduationYear || "—"}</dd>
+                </div>
+              </dl>
+
+              {student.verificationStatus === "rejected" && student.rejectionReason ? (
+                <p className="mt-3 break-words border-t border-slate-100 pt-3 text-sm leading-5 text-slate-500 [overflow-wrap:anywhere]">
+                  <span className="font-medium text-slate-700">Rejection reason: </span>{student.rejectionReason}
+                </p>
+              ) : null}
+
+              <div className="mt-5 border-t border-slate-100 pt-5">
+                {student.verificationStatus === "pending" ? (
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <button type="button" onClick={() => updateStudentStatus(student._id, "verified")} className="min-w-0 rounded-xl bg-emerald-600 px-2 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 sm:px-4">Approve</button>
+                    <button type="button" onClick={() => {setStudentToReject(student); setRejectionReason("");}} className="min-w-0 rounded-xl bg-rose-600 px-2 py-3 text-sm font-semibold text-white transition-colors hover:bg-rose-700 sm:px-4">Reject</button>
+                  </div>
+                ) : <span className="text-sm text-slate-400">Reviewed</span>}
+              </div>
+            </article>
+          ))}
+          {visibleStudents.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center text-sm text-slate-500 shadow-sm">No students in this category.</div>
+          ) : null}
+        </section>
+
+        {/* Full table for very wide screens */}
+        <section className="hidden overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm 2xl:block">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] border-collapse text-left">
               <thead className="bg-slate-100 text-xs font-bold uppercase tracking-wider text-slate-700">
@@ -88,7 +184,7 @@ export default function AdminVerificationPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {visibleStudents.map((student, index) => (
-                  <tr key={student.id} className={`${index % 2 === 0 ? "bg-white" : "bg-slate-50/70"} align-top`}>
+                  <tr key={student._id} className={`${index % 2 === 0 ? "bg-white" : "bg-slate-50/70"} align-top`}>
                     <td className="px-6 py-5">
                       <p className="font-semibold text-slate-950">{student.name}</p>
                       <p className="mt-1 text-slate-600">{student.email}</p>
@@ -99,16 +195,23 @@ export default function AdminVerificationPage() {
                       <p>{student.department}</p>
                       <p className="mt-1 text-sm text-slate-400">Graduation {student.graduationYear}</p>
                     </td>
-                    <td className="px-5 py-5 text-slate-700">{student.submittedAt}</td>
+                    <td className="px-5 py-5 text-slate-700">{formatDate(student.createdAt)}</td>
                     <td className="px-5 py-5">
-                      <StatusBadge status={student.status} />
-                      {student.status === "Rejected" && student.rejectionReason ? <p className="mt-2 max-w-48 text-xs text-slate-500">{student.rejectionReason}</p> : null}
+                      <StatusBadge status={student.verificationStatus} />
+                      {student.verificationStatus === "rejected" && student.rejectionReason ? (
+                        <p
+                          title={student.rejectionReason}
+                          className="mt-2 w-full max-w-40 text-xs leading-5 text-slate-500 [overflow-wrap:anywhere]"
+                        >
+                          {student.rejectionReason}
+                        </p>
+                      ) : null}
                     </td>
                     <td className="px-5 py-5">
-                      {student.status === "Pending" ? (
+                      {student.verificationStatus === "pending" ? (
                         <div className="flex items-center gap-2">
-                          <button type="button" onClick={() => updateStudentStatus(student.id, "Verified")} className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700">Approve</button>
-                          <button type="button" onClick={() => {setStudentToReject(student); setRejectionReason("");}} className="rounded-xl border border-rose-200 px-4 py-2.5 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-50">Reject</button>
+                          <button type="button" onClick={() => updateStudentStatus(student._id, "verified")} className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700">Approve</button>
+                          <button type="button" onClick={() => {setStudentToReject(student); setRejectionReason("");}} className="rounded-xl px-4 py-2.5 text-sm font-semibold bg-rose-600 transition-colors hover:bg-rose-700 text-amber-50">Reject</button>
                         </div>
                       ) : <span className="text-slate-400">Reviewed</span>}
                     </td>
@@ -123,9 +226,10 @@ export default function AdminVerificationPage() {
         </section>
       </div>
 
+      {/* Rejection form  */}
       {studentToReject ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4" onMouseDown={(event) => {if(event.target === event.currentTarget) setStudentToReject(null);}}>
-          <form className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl" onSubmit={(event) => {event.preventDefault(); updateStudentStatus(studentToReject.id, "Rejected", rejectionReason.trim());}}>
+          <form className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl" onSubmit={(event) => {event.preventDefault(); updateStudentStatus(studentToReject._id, "rejected", rejectionReason.trim());}}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium text-rose-600">Reject verification</p>
