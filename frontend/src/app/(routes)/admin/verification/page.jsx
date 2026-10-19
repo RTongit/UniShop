@@ -110,13 +110,13 @@ export default function AdminVerificationPage() {
   return (
     <main className="h-full overflow-y-auto bg-slate-50 px-3 py-4 sm:px-5 sm:py-6 md:px-10">
       <div className="mx-auto max-w-7xl">
-        <nav aria-label="Filter students" className="sticky top-0 z-0 -mx-3 mb-5 flex flex-nowrap items-center gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-sm sm:mx-0 sm:mb-7">
+        <nav aria-label="Filter students" className="sticky top-0 z-0 -mx-3 mb-5 flex flex-wrap items-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm sm:mx-0 sm:mb-7">
           {FILTERS.map((filter) => (
             <button
               key={filter}
               type="button"
               onClick={() => setActiveFilter(filter)}
-              className={`shrink-0 whitespace-nowrap rounded-xl px-4 py-3 text-sm font-medium transition-colors sm:px-6 ${activeFilter === filter ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"}`}
+              className={`shrink-0 whitespace-nowrap rounded-xl px-3 py-3 text-sm font-medium transition-colors sm:px-6 ${activeFilter === filter ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"}`}
             >
               {filter.toUpperCase()}
             </button>
