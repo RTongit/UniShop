@@ -17,11 +17,22 @@ async function updateStudentVerificationStatus(req,res) {
   const studentId = req.params.studentId
 
   try {
+
+    // check if the verificationStatus from the frontend body is either verified or pending 
+    if(verificationStatus!=="verified" && verificationStatus!=="rejected") {
+      return res.status(400).json({ message: "Invalid verification status" });
+    }
+
+    // check is the rejection reason is empty or not : 
+    if (verificationStatus === "rejected" && !rejectionReason?.trim()) {
+      return res.status(400).json({ message: "A rejection reason is required" });
+    }
+
     // check if it is valid studentId format or not : 
     if(!isValidObjectId(studentId)) return res.status(400).json({message : "Invalid objectId"})
 
     // check if the student exist or not 
-    const existingUser = await User.findOne({_id : studentId,role : "student"});
+    const existingUser = await User.findOne({_id : studentId, role : "student"});
     if(!existingUser) return res.status(404).json({message : "User does not exist"})
 
     const updatedUser = await User.findOneAndUpdate(

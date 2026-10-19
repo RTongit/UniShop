@@ -76,6 +76,11 @@ export default function AdminVerificationPage() {
 
   // Update a student's status in local React state
   async function updateStudentStatus(studentId, verificationStatus, rejectionReason = "") {
+
+    if (verificationStatus === "rejected" && rejectionReason?.trim()=="") {
+      toast.error("A rejection reason is required");
+    }
+
     try {
        const res = await fetch(`${BACKEND_URL}/api/admin/verification-requests/${studentId}`,
          {
