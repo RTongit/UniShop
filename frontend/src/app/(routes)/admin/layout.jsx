@@ -38,7 +38,7 @@ const AdminlayoutPage = ({children}) => {
       ) : null}
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="flex h-14 shrink-0 items-center border-b bg-white px-3 lg:hidden">
+        <div className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b bg-white px-3 lg:hidden">
           <button
             type="button"
             aria-label="Open admin navigation"
