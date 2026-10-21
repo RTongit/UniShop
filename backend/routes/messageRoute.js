@@ -18,7 +18,7 @@ messageRouter.post('/message',protectRoute,isVerified,postChatMessage)
 messageRouter.get('/:chatId/messages',protectRoute,isVerified,getChatMessages)
 
 // get Notification in the navbar message icon : 
-messageRouter.get('/users/global-notification-status',protectRoute,isVerified,getGlobalNotificationStatus)
+messageRouter.get('/users/global-notification-status',protectRoute,getGlobalNotificationStatus)
 
 // marks an unread chat as read 
 messageRouter.patch('/users/update-chat-notification-status/:chatId', protectRoute, isVerified,markChatAsRead);
