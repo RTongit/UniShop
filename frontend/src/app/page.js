@@ -20,9 +20,7 @@ export default function HomePage() {
   [authUser,router])
 
   // No authentication here : 
-  if(!authUser) {
-    return null;
-  }
+  if(!authUser) {return null;}
   if(isSearching) return <Spinner/>
   // if we are authenticated then below 
   return (
@@ -35,7 +33,7 @@ export default function HomePage() {
 
       {/* Todo : Recently added section */}
 
-      {authUser.role==="admin" ? <Link href="/admin">Go to Admin</Link> : null}
+      {authUser.role==="admin" ? <Link href="/admin/dashboard">Go to Admin</Link> : null}
 
       {/* Fresh new recommendations :  */}
       {/* <div className="lg:grid-cols-4">

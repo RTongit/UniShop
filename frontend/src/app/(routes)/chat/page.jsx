@@ -1,5 +1,6 @@
 "use client"
 
+import ErrorToast from "@/app/components/ErrorToast"
 import NoChatInterface from "@/app/components/NoChatInterface"
 import SideBar from "@/app/components/Sidebar.js"
 import Spinner from "@/app/components/Spinner.js"
@@ -10,6 +11,14 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { toast } from "sonner";
 
+function handleUnverifiedAccess() {
+  toast.custom(() => (
+    <ErrorToast
+      message="Your account must be verified to access this feature."
+    />
+  ), { duration: 5500, position: "top-center" });
+}
+
 export default function ChatPage() {
     const {authUser} = useAuthStore()
     const {myChats,isChatsLoading,getChats,selectedChat,setSelectedChat} = useChatStore()
@@ -17,10 +26,12 @@ export default function ChatPage() {
     useEffect(()=>{
         if(!authUser) {router.replace("/login"); return;}
         if (authUser.verificationStatus !== "verified") {
-            toast.error("Your account must be verified to access this feature.");
-            router.replace("/"); 
-            return;
+          // custom error toast : 
+          handleUnverifiedAccess()
+          router.replace("/"); 
+          return;
         }
+
         getChats();
     },
     [router,authUser,getChats])
