@@ -52,10 +52,8 @@ export default function EditPage({params}) {
 
 
     useEffect(() => {
-        if (!authUser) {
-            router.replace("/login")
-            return
-        }
+        if(!authUser) {router.replace("/login"); return;}
+        if (authUser.verificationStatus !== "verified") {router.replace("/"); return;}
 
         const fetchItem = async () => {
             const item = await getSingleItem(itemId)
@@ -152,9 +150,10 @@ export default function EditPage({params}) {
         if(response) router.replace("/my-listings")
     }
 
+    if(!authUser) return null;
+    if (authUser.verificationStatus !== "verified") return null;
     if(isLoadingItem) return <Spinner/>
     if(isEditing) return <EditLoader/>
-    if(!authUser) return null;
 
     return(
       <div className="min-h-screen bg-gray-50">

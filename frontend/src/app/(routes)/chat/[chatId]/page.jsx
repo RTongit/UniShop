@@ -24,8 +24,9 @@ export default function MessagePage({ params }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!authUser) router.replace("/login");
-    if (!selectedChat) router.replace("/chat");
+    if(!authUser) {router.replace("/login"); return;}
+    if (authUser.verificationStatus !== "verified") {router.replace("/"); return;}
+    if (!selectedChat) {router.replace("/chat"); return;}
     if (isPostingChat == false) getChats();
   }, [router, authUser, getChats, isPostingChat,selectedChat]);
 
@@ -45,6 +46,7 @@ export default function MessagePage({ params }) {
   }, [chatId, socket, authUser]);
 
   if (!authUser) return null;
+  if (authUser.verificationStatus !== "verified") return null;
   if(selectedChat==null) return null;
   if (isChatsLoading) return <Spinner />;
   if (isPostingChat) return <Spinner />;

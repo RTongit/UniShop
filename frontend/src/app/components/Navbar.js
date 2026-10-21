@@ -13,6 +13,7 @@ export default function Navbar() {
   const { authUser,logout,socket } = useAuthStore();
   const {getGlobalNotificationStatus,unreadChatCount,setUnreadChatCount} = useChatStore()
 
+
   useEffect(()=>{
     async function fetchData() {
       await getGlobalNotificationStatus()

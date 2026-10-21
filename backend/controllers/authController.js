@@ -61,7 +61,7 @@ async function signup(req,res) {
             profilePic : newUser.profilePic,
             email : newUser.email,
             role : newUser.role,
-            verificationStatus : newUser.verificationStatus,
+            verificationStatus : "pending",
         }
         );
     }
@@ -92,7 +92,8 @@ async function login(req,res) {
         return res.status(200).json({
             userId : existingUser._id,
             name : existingUser.name,
-            role : existingUser.role
+            role : existingUser.role,
+            verificationStatus : existingUser.verificationStatus,
         })
     }
     catch(error) {
@@ -121,7 +122,10 @@ async function logout(req,res) {
 
 function authCheck(req,res) {
     try {
-        return res.status(200).json(req.AuthUser);
+        return res.status(200).json({
+            ...req.AuthUser,
+            verificationStatus: req.verificationStatus,
+        });
     }
     catch(error) {
         console.log(`Error in authCheck controller ${error.message}`)

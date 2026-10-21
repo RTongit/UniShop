@@ -58,8 +58,8 @@ export const useChatStore = create((set,get)=>({
             set({myChats : response})
         }
         catch(error) {
-            toast.error(error.message)
-            return
+            console.log(error.message)
+            return;
         }
         finally {
             set({isChatsLoading : false});

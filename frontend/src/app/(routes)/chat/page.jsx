@@ -8,18 +8,25 @@ import { useChatStore } from "@/app/store/chatStore.js"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { toast } from "sonner";
 
 export default function ChatPage() {
     const {authUser} = useAuthStore()
     const {myChats,isChatsLoading,getChats,selectedChat,setSelectedChat} = useChatStore()
     const router = useRouter()
     useEffect(()=>{
-        if(!authUser) router.replace("/login")
+        if(!authUser) {router.replace("/login"); return;}
+        if (authUser.verificationStatus !== "verified") {
+            toast.error("Your account must be verified to access this feature.");
+            router.replace("/"); 
+            return;
+        }
         getChats();
     },
     [router,authUser,getChats])
     
     if(!authUser) return null
+    if (authUser.verificationStatus !== "verified") return null;
     if(isChatsLoading) return <Spinner/>
     return (
         <>

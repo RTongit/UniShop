@@ -17,6 +17,7 @@ export default async function protectRoute(req,res,next) {
         if(payloadObj) {
             req.AuthUser = payloadObj;
             req.role = existingUser.role 
+            req.verificationStatus = existingUser.verificationStatus
             next();
         };
     }

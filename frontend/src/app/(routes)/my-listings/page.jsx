@@ -39,7 +39,9 @@ export default function ListingPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
-    if (!authUser) router.replace("/login");
+    if(!authUser) {router.replace("/login"); return;}
+    if (authUser.verificationStatus !== "verified") {router.replace("/"); return;}
+    
     async function fetchItems() {
       const response = await getMyItems();
       if (!response) return;
@@ -48,8 +50,6 @@ export default function ListingPage() {
     fetchItems();
   }, [authUser, router, getMyItems]);
 
-  if (!authUser) return null;
-  if (isMyItemsLoading) return <Spinner />;
 
   function handleFilter(selectedFilter) {
     if (selectedFilter && selectedFilter.length == 0) {
@@ -86,6 +86,7 @@ export default function ListingPage() {
       );
     }
   }
+
   function handleReset() {
     setItems((items) => myItems);
     setSelectedFilter([]);
@@ -104,6 +105,10 @@ export default function ListingPage() {
     }
     setItems(obj);
   }
+
+  if (!authUser) return null;
+  if (authUser.verificationStatus !== "verified") return null;
+  if (isMyItemsLoading) return <Spinner />;
 
   return myItems.length == 0 ? (
     <NoPostingUI />

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X,Check } from "lucide-react";
+import { X,Check,ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/app/store/authStore";
 import Spinner from "@/app/components/Spinner";
@@ -37,7 +37,7 @@ function StatusBadge({ status }) {
 export default function AdminVerificationPage() {
   const {authUser} = useAuthStore();
   const router = useRouter();
-  const [activeFilter, setActiveFilter] = useState("All students");
+  const [activeFilter, setActiveFilter] = useState("pending");
   const [students, setStudents] = useState([]);
   const [studentToReject, setStudentToReject] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -112,16 +112,19 @@ export default function AdminVerificationPage() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-5 sm:mb-7">
           <label htmlFor="student-status-filter" className="sr-only">Filter students by status</label>
-          <select
-            id="student-status-filter"
-            value={activeFilter}
-            onChange={(event) => setActiveFilter(event.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:hidden"
-          >
-            {FILTERS.map((filter) => (
-              <option key={filter} value={filter}>{filter === "All students" ? filter : filter[0].toUpperCase() + filter.slice(1)}</option>
-            ))}
-          </select>
+          <div className="relative sm:hidden">
+            <select
+              id="student-status-filter"
+              value={activeFilter}
+              onChange={(event) => setActiveFilter(event.target.value)}
+              className="w-full appearance-none rounded-md border border-slate-200 bg-white py-3 pl-4 pr-12 text-sm font-semibold text-slate-800 shadow-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            >
+              {FILTERS.map((filter) => (
+                <option key={filter} value={filter}>{filter === "All students" ? filter : filter[0].toUpperCase() + filter.slice(1)}</option>
+              ))}
+            </select>
+            <ChevronDown aria-hidden="true" size={18} className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-slate-600" />
+          </div>
 
           <nav aria-label="Filter students" className="hidden items-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm sm:flex">
             {FILTERS.map((filter) => (

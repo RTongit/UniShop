@@ -47,7 +47,9 @@ export default function SellItemForm() {
 
 
   useEffect(() => {
-    if(!authUser) router.replace("/login");
+    if(!authUser) {router.replace("/login"); return;}
+    if (authUser.verificationStatus !== "verified") {router.replace("/"); return;}
+  
   }, [authUser,router]);
 
   const handlePhotoUpload = (index, e) => {
@@ -116,6 +118,9 @@ export default function SellItemForm() {
   };
 
   if (!authUser) return null;
+  if (authUser.verificationStatus !== "verified") return null;
+  
+
   if(isPosting) return <PostingLoader/>
   
   return (
