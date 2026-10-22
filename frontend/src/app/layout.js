@@ -17,10 +17,10 @@ export default function RootLayout({children}) {
   return (
     <html lang="en" className={poppins.className}>
       <body>
+        <Toaster position="top-center"/>
         <AuthCheckComponent>
           <Navbar/>
           {children}
-          <Toaster position="top-center"/>
         </AuthCheckComponent>
       </body>
     </html>
