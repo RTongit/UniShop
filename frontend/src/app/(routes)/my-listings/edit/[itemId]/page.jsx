@@ -1,6 +1,7 @@
 "use client"
 
 import EditLoader from "@/app/components/EditLoader"
+import ErrorToast from "@/app/components/ErrorToast"
 import Spinner from "@/app/components/Spinner"
 import { useAuthStore } from "@/app/store/authStore"
 import { useItemStore } from "@/app/store/itemStore"
@@ -35,6 +36,14 @@ const PICKUP_LOCATIONS = [
   "Sports Ground",
 ];
 
+function handleUnverifiedAccess() {
+  toast.custom(() => (
+    <ErrorToast
+      message="Your account must be verified to access this feature."
+    />
+  ), { duration: 5500, position: "top-center" });
+}
+
 export default function EditPage({params}) {
     const {isLoadingItem,getSingleItem,singleItem,editItem,isEditing} = useItemStore()
     
@@ -53,7 +62,12 @@ export default function EditPage({params}) {
 
     useEffect(() => {
         if(!authUser) {router.replace("/login"); return;}
-        if (authUser.verificationStatus !== "verified") {router.replace("/"); return;}
+        if (authUser.verificationStatus !== "verified") {
+          // custom error toast : 
+          handleUnverifiedAccess()
+          router.replace("/"); 
+          return;
+        }
 
         const fetchItem = async () => {
             const item = await getSingleItem(itemId)

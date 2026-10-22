@@ -23,8 +23,18 @@ import Spinner from "@/app/components/Spinner";
 import formatDate from "@/app/constant/formatDate";
 import Link from "next/link";
 import NoPostingUI from "@/app/components/NoPostingUI";
+import ErrorToast from "@/app/components/ErrorToast";
+import { toast } from "sonner";
 
 // const myItem2 = []
+
+function handleUnverifiedAccess() {
+  toast.custom(() => (
+    <ErrorToast
+      message="Your account must be verified to access listings."
+    />
+  ), { duration: 5500, position: "top-center" });
+}
 
 export default function ListingPage() {
   const { authUser } = useAuthStore();
@@ -40,7 +50,12 @@ export default function ListingPage() {
 
   useEffect(() => {
     if(!authUser) {router.replace("/login"); return;}
-    if (authUser.verificationStatus !== "verified") {router.replace("/"); return;}
+    if (authUser.verificationStatus !== "verified") {
+      // custom error toast : 
+      handleUnverifiedAccess()
+      router.replace("/"); 
+      return;
+    }
     
     async function fetchItems() {
       const response = await getMyItems();

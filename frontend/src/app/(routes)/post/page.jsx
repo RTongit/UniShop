@@ -6,6 +6,7 @@ import { X, Plus, Send } from "lucide-react";
 import { useAuthStore } from "@/app/store/authStore";
 import { useItemStore } from "@/app/store/itemStore";
 import PostingLoader from "@/app/components/PostingLoader";
+import ErrorToast from "@/app/components/ErrorToast";
 
 const CATEGORIES = [
   "Books & Notes",
@@ -32,6 +33,15 @@ const PICKUP_LOCATIONS = [
   "Sports Ground",
 ];
 
+function handleUnverifiedAccess() {
+  toast.custom(() => (
+    <ErrorToast
+      message="Your account must be verified to post an item."
+    />
+  ), { duration: 5500, position: "top-center" });
+}
+
+
 export default function SellItemForm() {
   const { authUser } = useAuthStore();
   const { postItem,isPosting } = useItemStore();
@@ -48,7 +58,12 @@ export default function SellItemForm() {
 
   useEffect(() => {
     if(!authUser) {router.replace("/login"); return;}
-    if (authUser.verificationStatus !== "verified") {router.replace("/"); return;}
+    if (authUser.verificationStatus !== "verified") {
+      // custom error toast : 
+      handleUnverifiedAccess()
+      router.replace("/"); 
+      return;
+    }
   
   }, [authUser,router]);
 

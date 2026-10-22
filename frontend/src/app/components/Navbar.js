@@ -6,6 +6,16 @@ import { useAuthStore } from "../store/authStore";
 import ProfileDropDown from "./ProfileDropDown";
 import { MessageCircle, ShoppingBag } from "lucide-react";
 import { useChatStore } from "../store/chatStore";
+import ErrorToast from "./ErrorToast";
+import { toast } from "sonner";
+
+function handleUnverifiedAccess(message) {
+  toast.custom(() => (
+    <ErrorToast
+      message= {message}
+    />
+  ), { duration: 5500, position: "top-center" });
+}
 
 export default function Navbar() {
   let [item, setItem] = useState("");
@@ -68,12 +78,25 @@ export default function Navbar() {
               />
               ) : (null)}
 
-              {authUser ? (<Link href="/post" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
-                <ShoppingBag /> <span className="hidden lg:block">Sell</span>
-              </Link>) : null}
+              {authUser ? 
+              (<button
+                onClick={()=>{
+                  if (authUser.verificationStatus !== "verified") {handleUnverifiedAccess("Your account must be verified to post an item.")}
+                  else router.push("/post" )
+                }} 
+                className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
+                  <ShoppingBag /> <span className="hidden lg:block">Sell</span>
+              </button>) 
+              : null
+              }
 
               {authUser ? (
-                <Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
+                <button
+                onClick={()=>{
+                  if (authUser.verificationStatus !== "verified") {handleUnverifiedAccess("Your account must be verified to access chat section.")}
+                  else router.push("/chat")
+                }} 
+                className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
                  >
                  <MessageCircle />
 
@@ -82,7 +105,7 @@ export default function Navbar() {
                      : 
                     null
                   }
-                </Link>
+                </button>
               ) : null}
 
             </div>
@@ -123,12 +146,24 @@ export default function Navbar() {
               />
             ) : (null)}
 
-            {authUser ? (<Link href="/post" className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
-              <ShoppingBag /> <span className="hidden lg:block">Sell</span>
-            </Link>) : null}
+            {authUser ? 
+              (<button 
+                onClick={()=>{
+                  if (authUser.verificationStatus !== "verified") {handleUnverifiedAccess("Your account must be verified to post an item.")}
+                  else router.push("/post" )
+                }} 
+                className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
+                  <ShoppingBag /> <span className="hidden lg:block">Sell</span>
+              </button>) : null
+            }
 
             {authUser ? 
-            (<Link href="/chat" className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
+            (<button 
+              onClick={()=>{
+                 if (authUser.verificationStatus !== "verified") {handleUnverifiedAccess("Your account must be verified to access chat section.");}
+                 else router.push("/chat")
+              }}
+              className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
               >
               <MessageCircle />
               {unreadChatCount>0 ? 
@@ -136,7 +171,7 @@ export default function Navbar() {
                 : 
                null
               }
-             </Link>) 
+             </button>) 
              : null}
 
           </div>

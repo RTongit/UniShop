@@ -53,14 +53,20 @@ async function searchItems(req,res) {
         title = title.trim();
         // We check if it is empty or not : 
         if(title.length==0) {return res.status(404).json({message : "Sorry! No items found"})};
+
+        const verifiedSellers = await User.find({
+          role: "student",
+          verificationStatus: "verified",
+        }).select("_id");
+
+        const verifiedSellerIds = verifiedSellers.map((user) => user._id);
         
-        // console.log(title)
         // will get items from database :
         const items = await Item.find(
         {$and : 
             [
                { 
-                 seller : {$ne : authUserId}
+                 seller : {$ne : authUserId, $in :verifiedSellerIds }
                },
                {$or : 
                   [

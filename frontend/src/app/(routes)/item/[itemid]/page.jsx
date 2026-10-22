@@ -236,9 +236,9 @@ export default function ItemPage({ params }) {
               <span>🎓 Nondu </span>
             </div>
 
-            <Link href={`/search`} className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-xl py-2.5 transition-colors">
+            {/* <Link href={`/search`} className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-xl py-2.5 transition-colors">
               View All Listings
-            </Link>
+            </Link> */}
           </div>
         </div>
 

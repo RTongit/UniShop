@@ -14,7 +14,7 @@ import { toast } from "sonner";
 function handleUnverifiedAccess() {
   toast.custom(() => (
     <ErrorToast
-      message="Your account must be verified to access this feature."
+      message="Your account must be verified to access chat section."
     />
   ), { duration: 5500, position: "top-center" });
 }
