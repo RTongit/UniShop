@@ -120,7 +120,7 @@ async function postChatMessage(req, res) {
 
     if (!chatId)
       return res.status(400).json({ message: "ChatId is not defined" });
-    if (!text || text.trim() === "")
+    if ((!text || text.trim() === "") && !image)
       return res.status(400).json({ message: "Message cannot be empty" });
 
     // check the format of id :
@@ -151,7 +151,7 @@ async function postChatMessage(req, res) {
       chat: chatId,
       sender: sender,
       receiver: newReceiver,
-      text: text,
+      text: text?.trim() || "",
       image: imageUrl,
     });
     await newChatMessage.save();

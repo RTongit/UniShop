@@ -34,13 +34,13 @@ export default function Message({ text, textColor, user, image, color, pos, crea
         </p>
 
         {/* Text */}
-        <div
-          className={`w-fit max-w-full rounded-lg rounded-bl-md ${color} px-4 py-3`}
-        >
-          <p className={`break-words whitespace-pre-wrap text-sm leading-5 ${textColor}`}>
-            {text}
-          </p>
-        </div>
+        {text && (
+          <div className={`w-fit max-w-full rounded-lg rounded-bl-md ${color} px-4 py-3`}>
+            <p className={`break-words whitespace-pre-wrap text-sm leading-5 ${textColor}`}>
+              {text}
+            </p>
+          </div>
+        )}
 
         {/* Image */}
         {image && (

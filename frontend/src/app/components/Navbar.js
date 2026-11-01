@@ -129,7 +129,7 @@ export default function Navbar() {
             />
             <button
               type="submit"
-              className="shrink-0 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:px-5 sm:py-2.5"
+              className="hidden shrink-0 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:inline-flex sm:px-5 sm:py-2.5"
               disabled={!item.trim()}
             >
               Search
