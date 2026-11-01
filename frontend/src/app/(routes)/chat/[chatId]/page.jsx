@@ -53,7 +53,7 @@ export default function MessagePage({ params }) {
   if (isMessagesLoading) return <Spinner />;
 
   return (
-    <div className="flex md:flex-row flex-col h-[calc(100vh-122px)] lg:h-[calc(100vh-78px)] bg-stone-100 p-3 gap-x-3">
+    <div className="flex h-[calc(100dvh-150px)] flex-col overflow-hidden bg-stone-100 p-2 md:h-[calc(100dvh-122px)] md:flex-row md:gap-x-3 md:p-3 lg:h-[calc(100dvh-78px)]">
       
       {/* Side bar containing chats */}
       <div className="gap-y-3 min-w-[280px] rounded-md h-full md:flex md:flex-col hidden overflow-y-auto">
@@ -61,7 +61,7 @@ export default function MessagePage({ params }) {
       </div>
 
       {/* Message container containing messages :  */}
-      <div className="w-full h-full">
+      <div className="h-full min-h-0 w-full flex-1 overflow-hidden">
         <MessageContainer chatId={chatId} />
       </div>
 

@@ -204,10 +204,10 @@ const MessageContainer = ({ chatId }) => {
   function removePhoto() {}
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
       
       {/* Header containing userToChat name and its profilePic and cross*/}
-      <div className="flex h-15 items-center justify-between border-b border-gray-200 bg-white px-6 py-2">
+      <div className="flex h-15 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 py-2 sm:px-6">
         
         {/* Profile */}
         <div className="flex items-center gap-3 ">
@@ -254,7 +254,7 @@ const MessageContainer = ({ chatId }) => {
       </div>
 
       {/*Messages logs section*/}
-      <div className="overflow-y-scroll h-full" >
+      <div className="min-h-0 flex-1 overflow-y-auto">
           {myMessages.map((message,i)=>(
           <div key={i} className="flex flex-col gap-y-1 p-2">
             {message.sender._id.toString()==authUser.userId ? 
@@ -293,7 +293,7 @@ const MessageContainer = ({ chatId }) => {
 
       {/* Send Text and files section */}
       <form
-        className="bg-stone-200 h-20 my-5 mx-5 rounded-md flex box-border"
+        className="mx-2 my-2 flex h-14 shrink-0 box-border rounded-md bg-stone-200 sm:mx-5 sm:my-5 sm:h-20"
         onSubmit={(e) => {
           handleSubmit(e);
         }}
