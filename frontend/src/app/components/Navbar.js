@@ -56,11 +56,11 @@ export default function Navbar() {
   }
   
   return (
-    <div className="bg-white border-b border-gray-200 md:px-6 py-4 px-3 flex items-center sticky top-0 z-10">
-      <div className="flex lg:flex-row flex-col justify-between items-center w-full gap-4 ">
+    <div className="sticky top-0 z-10 flex items-center border-b border-gray-200 bg-white px-3 py-2 md:px-6 md:py-4">
+      <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row lg:gap-4">
 
         {/* Left section Unishop logo and search */}
-        <div className="flex lg:flex-row flex-col gap-x-6 lg:gap-y-0 gap-y-2 w-full">
+        <div className="flex w-full flex-col gap-x-6 gap-y-1 lg:flex-row lg:gap-y-0">
 
           <div className="text-lg font-bold whitespace-nowrap flex justify-between">
             {/*UniShop Logo */}
@@ -116,20 +116,20 @@ export default function Navbar() {
           {authUser &&           
           <form
             onSubmit={handleSubmit}
-            className="flex min-w-0 w-full items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 shadow-sm transition focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100/70"
+            className="flex min-w-0 w-full items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-1 shadow-sm transition focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100/70 md:rounded-2xl md:p-1.5"
           >
-            <Search className="ml-2 size-5 shrink-0 text-slate-400" aria-hidden="true" />
+            <Search className="ml-2 size-4 shrink-0 text-slate-400 md:size-5" aria-hidden="true" />
             <input
               type="text"
               value={item}
               placeholder="Search laptops, books, cycles..."
               aria-label="Search marketplace"
-              className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:py-2.5"
+              className="min-w-0 flex-1 bg-transparent px-1 py-1.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 md:py-2.5"
               onChange={(e) => setItem(e.target.value)}
             />
             <button
               type="submit"
-              className="shrink-0 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:px-5"
+              className="shrink-0 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 md:rounded-xl md:py-2.5 md:px-5"
               disabled={!item.trim()}
             >
               Search
