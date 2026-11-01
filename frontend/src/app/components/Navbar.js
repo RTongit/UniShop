@@ -118,7 +118,6 @@ export default function Navbar() {
             onSubmit={handleSubmit}
             className="flex min-w-0 w-full items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1 shadow-sm transition focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100/70 sm:p-1.5"
           >
-            <Search className="ml-2 size-5 shrink-0 text-slate-400" aria-hidden="true" />
             <input
               type="text"
               value={item}
@@ -129,10 +128,12 @@ export default function Navbar() {
             />
             <button
               type="submit"
-              className="hidden shrink-0 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:inline-flex sm:px-5 sm:py-2.5"
+              aria-label="Search"
+              title="Search"
               disabled={!item.trim()}
+              className={`inline-flex shrink-0 items-center justify-center rounded-xl px-3 py-2 transition-colors sm:py-2.5 ${item.trim() ? "bg-blue-100 text-slate-900 hover:bg-blue-200" : "cursor-not-allowed bg-slate-200 text-slate-400"}`}
             >
-              Search
+              <Search size={20} strokeWidth={2.25} aria-hidden="true" />
             </button>
           </form>}
 

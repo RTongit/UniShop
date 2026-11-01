@@ -142,14 +142,20 @@ const MessageContainer = ({ chatId }) => {
     subscribeToMessage,
     unsubscribeFromMessage,
   } = useChatStore();
-  const { authUser } = useAuthStore();
+  const { authUser, socket } = useAuthStore();
   const [text, setText] = useState("");
   const [image, setImage] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const router = useRouter()
 
   const isInitialLoad = useRef(true);
 
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const otherUserId = selectedChat
+    ? (authUser.userId === selectedChat.buyer._id.toString() ? selectedChat.seller._id : selectedChat.buyer._id).toString()
+    : null;
 
   useEffect(() => {
     // Auto scroll new messages
@@ -168,6 +174,19 @@ const MessageContainer = ({ chatId }) => {
       unsubscribeFromMessage();
     };
   }, [subscribeToMessage, unsubscribeFromMessage]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleOnlineUsers = (users) => setOnlineUsers(users);
+    const requestOnlineUsers = () => socket.emit("getOnlineUsers");
+    socket.on("onlineUsers", handleOnlineUsers);
+    socket.on("connect", requestOnlineUsers);
+    if (socket.connected) requestOnlineUsers();
+    return () => {
+      socket.off("onlineUsers", handleOnlineUsers);
+      socket.off("connect", requestOnlineUsers);
+    };
+  }, [socket]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -191,17 +210,26 @@ const MessageContainer = ({ chatId }) => {
   function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Choose an image file");
+      e.target.value = "";
+      return;
+    }
     const reader = new FileReader();
-    // Async so others task will runs as well
     reader.readAsDataURL(file);
 
     reader.addEventListener("load", () => {
       setImage(reader.result);
+      setImageFile(file);
+      e.target.value = "";
     });
   }
 
-  // Todo : will add later
-  function removePhoto() {}
+  function removePhoto() {
+    setImage("");
+    setImageFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
@@ -221,7 +249,9 @@ const MessageContainer = ({ chatId }) => {
               alt="photo"
               className="md:size-12 size-11 rounded-full object-cover"
             />
-            <span className="size-3 rounded-full bg-green-600 bottom-2 right-0.5 absolute" />
+            {otherUserId && onlineUsers.includes(otherUserId) && (
+              <span title="Online" className="absolute bottom-2 right-0.5 size-3 rounded-full bg-green-600" />
+            )}
           </div>
 
           <div className="flex flex-col gap-y-1">
@@ -291,6 +321,22 @@ const MessageContainer = ({ chatId }) => {
         <div ref={messagesEndRef}></div>
       </div>
 
+      {image && (
+        <div className="mx-3 mt-2 flex w-full max-w-[360px] shrink-0 self-start items-center gap-3 rounded-xl border border-slate-200 bg-white p-2.5 sm:mx-5 sm:gap-4 sm:p-3">
+          <img src={image} alt="Selected image preview" className="size-14 shrink-0 rounded-lg object-cover sm:size-16" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-slate-800">{imageFile?.name || "Selected image"}</p>
+            {imageFile && <p className="mt-1 text-xs text-slate-500">{imageFile.size >= 1024 * 1024 ? `${(imageFile.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(imageFile.size / 1024))} KB`} <span className="px-1">·</span> {imageFile.type.split("/")[1]?.toUpperCase()} image</p>}
+            <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-1 text-xs font-medium text-slate-700 underline underline-offset-2 hover:text-black">
+              Choose another image
+            </button>
+          </div>
+          <button type="button" onClick={removePhoto} aria-label="Remove selected image" className="grid size-8 shrink-0 place-items-center self-start rounded-full text-slate-500 hover:bg-slate-100 hover:text-black">
+            <X size={17} />
+          </button>
+        </div>
+      )}
+
       {/* Send Text and files section */}
       <form
         className="mx-2 my-2 flex h-14 shrink-0 box-border rounded-md bg-stone-200 sm:mx-5 sm:my-5 sm:h-20"
@@ -301,6 +347,7 @@ const MessageContainer = ({ chatId }) => {
         <label className="flex items-center px-4 hover:cursor-pointer">
           <Paperclip className="size-5 md:size-6"/>
           <input
+            ref={fileInputRef}
             type="file"
             accept="image/*"
             hidden
