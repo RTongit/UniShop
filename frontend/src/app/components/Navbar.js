@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "../store/authStore";
 import ProfileDropDown from "./ProfileDropDown";
-import { MessageCircle, ShoppingBag } from "lucide-react";
+import { MessageCircle, Plus, Search } from "lucide-react";
 import { useChatStore } from "../store/chatStore";
 import ErrorToast from "./ErrorToast";
 import { toast } from "sonner";
@@ -85,7 +85,7 @@ export default function Navbar() {
                   else router.push("/post" )
                 }} 
                 className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
-                  <ShoppingBag /> <span className="hidden lg:block">Sell</span>
+                  <Plus /> <span className="hidden lg:block">Sell</span>
               </button>) 
               : null
               }
@@ -114,18 +114,22 @@ export default function Navbar() {
 
           {/* Search bar and search button*/}
           {authUser &&           
-          <form onSubmit={handleSubmit} className="flex w-full ">
+          <form
+            onSubmit={handleSubmit}
+            className="flex min-w-0 w-full items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 shadow-sm transition focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100/70"
+          >
+            <Search className="ml-2 size-5 shrink-0 text-slate-400" aria-hidden="true" />
             <input
               type="text"
-              placeholder="Search for laptops, books, cycles..."
-              className="w-full border border-r-0 border-gray-200 rounded-l-lg px-4 py-2 text-[12px] sm:text-sm outline-none focus:border-blue-500 text-gray-900"
-              onChange={(e) => {
-                setItem(e.target.value);
-              }}
+              value={item}
+              placeholder="Search laptops, books, cycles..."
+              aria-label="Search marketplace"
+              className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:py-2.5"
+              onChange={(e) => setItem(e.target.value)}
             />
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 rounded-r-lg disabled:bg-blue-300"
+              className="shrink-0 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:px-5"
               disabled={!item.trim()}
             >
               Search
@@ -153,7 +157,7 @@ export default function Navbar() {
                   else router.push("/post" )
                 }} 
                 className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
-                  <ShoppingBag /> <span className="hidden lg:block">Sell</span>
+                  <Plus /> <span className="hidden lg:block">Sell</span>
               </button>) : null
             }
 

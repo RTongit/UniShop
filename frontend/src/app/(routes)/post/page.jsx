@@ -140,7 +140,7 @@ export default function SellItemForm() {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-9xl mx-auto px-6 py-8">
+      <div className="mx-auto w-full max-w-9xl px-4 py-5 sm:px-6 sm:py-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <button
@@ -158,8 +158,8 @@ export default function SellItemForm() {
         </div>
 
         {/* Form card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="min-w-0 rounded-2xl border border-gray-200 bg-white p-4 sm:p-8">
+          <div className="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
             {/* LEFT COLUMN */}
             <div className="space-y-6">
               {/* Photos */}
@@ -171,7 +171,7 @@ export default function SellItemForm() {
                   Upload up to 5 photos. The first photo will be the cover
                   photo.
                 </p>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                   {pics.map((pic, i) => (
                     <div key={i} className="relative">
                       {pic ? (
@@ -343,16 +343,16 @@ export default function SellItemForm() {
           </div>
 
           {/* Bottom actions */}
-          <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+          <div className="mt-8 flex flex-col-reverse items-stretch gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
             <button
               onClick={() => router.back()}
-              className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              className="w-full rounded-xl border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:w-auto"
             >
               Cancel
             </button>
             <button
               onClick={(e)=>{handleSubmit(e)}}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-black px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-700 sm:w-auto"
             >
               <Send size={15} />
               Post Item

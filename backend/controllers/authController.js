@@ -1,6 +1,7 @@
 import createJWT from "../lib/jwt.js";
 import User from "../models/UserModel.js";
 import bcrypt from "bcryptjs"
+import cloudinary from "../lib/cloudinary.js";
 
 async function signup(req,res) {
     const {name,enrollmentId,password,department,graduationYear,phoneNumber,email} = req.body;
@@ -133,5 +134,36 @@ function authCheck(req,res) {
     }
 }
 
+async function getProfile(req, res) {
+    try {
+        const user = await User.findById(req.AuthUser.userId).select("name email phoneNumber enrollmentId department graduationYear profilePic role verificationStatus rejectionReason createdAt");
+        if (!user) return res.status(404).json({ message: "User not found" });
+        return res.status(200).json(user);
+    } catch (error) {
+        console.log(`Error in getProfile controller: ${error.message}`);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
 
-export {signup,login,logout,authCheck};
+async function updateProfile(req, res) {
+    try {
+        const { profilePic } = req.body;
+        if (typeof profilePic !== "string" || !/^data:image\/(png|jpeg|jpg|webp);base64,/.test(profilePic)) {
+            return res.status(400).json({ message: "Choose a valid image for your profile photo" });
+        }
+        const uploadedImage = await cloudinary.uploader.upload(profilePic, { folder: "unishop/profile-pictures" });
+        const user = await User.findByIdAndUpdate(
+            req.AuthUser.userId,
+            { $set: { profilePic: uploadedImage.secure_url } },
+            { new: true, runValidators: true }
+        ).select("name email phoneNumber enrollmentId department graduationYear profilePic role verificationStatus rejectionReason createdAt");
+        if (!user) return res.status(404).json({ message: "User not found" });
+        return res.status(200).json(user);
+    } catch (error) {
+        console.log(`Error in updateProfile controller: ${error.message}`);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+
+export {signup,login,logout,authCheck,getProfile,updateProfile};

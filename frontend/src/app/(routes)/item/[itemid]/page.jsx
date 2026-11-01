@@ -3,11 +3,12 @@ import Spinner from "@/app/components/Spinner";
 import { useItemStore } from "@/app/store/itemStore";
 import { notFound, useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Heart, MoveLeft, Share } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Heart, MoveLeft, Share, University } from "lucide-react";
 import formatDate from "@/app/constant/formatDate";
 import Link from "next/link";
 import { useAuthStore } from "@/app/store/authStore";
 import { useChatStore } from "@/app/store/chatStore";
+import { toast } from "sonner";
 
 // Mock data — replace with your Zustand store / API call
 const item = {
@@ -26,10 +27,29 @@ export default function ItemPage({ params }) {
   const [activePhoto, setActivePhoto] = useState(0);
   const [saved, setSaved] = useState(false);
 
+  const handleShare = async () => {
+    if (!singleItem) return;
+
+    const shareData = { title: singleItem.title, text: `Check out ${singleItem.title} on UniShop`, url: window.location.href };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        toast.success("Item link copied to clipboard");
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") toast.error("Could not share this item");
+    }
+  };
+
   const formatPrice = (p) => "₹" + p.toLocaleString("en-IN");
 
   useEffect(() => {
-    if(!authUser) router.replace("/login")
+    if(!authUser) {
+      router.replace("/login"); 
+      return;
+    }
     getSingleItem(itemid);
   }, [getSingleItem, itemid,authUser,router]);
 
@@ -64,8 +84,12 @@ export default function ItemPage({ params }) {
                 </button>
 
                 {/* Share */}
-                <button 
-                   className="text-white hover:text-gray-500 absolute top-4 right-15">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  aria-label="Share this item"
+                  className="absolute right-15 top-4 text-white hover:text-gray-300"
+                >
                   <Share />
                 </button>
 
@@ -214,9 +238,11 @@ export default function ItemPage({ params }) {
                   <span className="text-sm font-bold text-gray-900">
                     {singleItem.sellerInfo.sellerName}
                   </span>
-                  <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                    {singleItem.sellerInfo.verificationStatus} 
-                  </span>
+                  {singleItem.sellerInfo.verificationStatus === "verified" && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-black px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-white">
+                      <Check size={12} strokeWidth={2} /> Verified
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {singleItem.sellerInfo.department} • {singleItem.sellerInfo.graduationYear}
@@ -233,7 +259,7 @@ export default function ItemPage({ params }) {
 
             <div className="flex items-center gap-6 text-xs text-gray-500 mb-4">
               <span> Joined : {formatDate(singleItem.sellerInfo.joinedAt)}</span>
-              <span>🎓 Nondu </span>
+              <span className="inline-flex items-center gap-1.5"><University size={14} strokeWidth={1.8} /> Nondu</span>
             </div>
 
             {/* <Link href={`/search`} className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-xl py-2.5 transition-colors">

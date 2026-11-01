@@ -45,6 +45,7 @@ const io = new Server(httpServer,{
     }
 })
 app.set("io", io);
+const userSockets = new Map();
 
 // IO start from here and goes yo io.on using next
 io.use(async (socket,next)=>{
@@ -90,6 +91,14 @@ io.use(async (socket,next)=>{
 io.on("connection", (socket) => {
     // console.log("User connected:", socket.userId);
     console.log(typeof socket.userId, socket.userId.toString());
+    const connectedUserId = socket.userId.toString();
+    if (!userSockets.has(connectedUserId)) userSockets.set(connectedUserId, new Set());
+    userSockets.get(connectedUserId).add(socket.id);
+    io.emit("onlineUsers", [...userSockets.keys()]);
+
+    socket.on("getOnlineUsers", () => {
+        socket.emit("onlineUsers", [...userSockets.keys()]);
+    });
     
     // If the user is admin join the admin room : 
     if(socket.role==="admin") {
@@ -131,6 +140,10 @@ io.on("connection", (socket) => {
     })
 
     socket.on("disconnect",()=>{
+        const userSocketIds = userSockets.get(connectedUserId);
+        userSocketIds?.delete(socket.id);
+        if (userSocketIds?.size === 0) userSockets.delete(connectedUserId);
+        io.emit("onlineUsers", [...userSockets.keys()]);
         // console.log("User disconnected:", socket.userId);
     })
 });

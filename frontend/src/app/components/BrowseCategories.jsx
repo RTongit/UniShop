@@ -84,7 +84,7 @@ export default function BrowseCategory() {
           onClick={() => {
             router.push("/categories");
           }}
-          className="shrink-0 rounded-full border border-[#52654f]/30 px-4 py-2 text-xs font-semibold text-[#294332] transition hover:bg-[#e9eddf] sm:px-5 sm:text-sm"
+          className="shrink-0 rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition hover:bg-gray-800 sm:px-5 sm:text-sm"
         >
           More Categories
         </button>
@@ -95,7 +95,7 @@ export default function BrowseCategory() {
         {/* Left Arrow */}
         <button
           onClick={scrollLeft}
-          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#52654f]/20 bg-[#f6f4eb] text-[#294332] transition hover:bg-[#e9eddf]"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-black text-white transition hover:bg-gray-800"
         >
           <ChevronLeft size={17} />
         </button>
@@ -137,7 +137,7 @@ export default function BrowseCategory() {
         {/* Right Arrow */}
         <button
           onClick={scrollRight}
-          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#52654f]/20 bg-[#f6f4eb] text-[#294332] transition hover:bg-[#e9eddf]"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-black text-white transition hover:bg-gray-800"
         >
           <ChevronRight size={17} />
         </button>
