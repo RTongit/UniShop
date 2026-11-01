@@ -70,31 +70,32 @@ export default function BrowseCategory() {
   };
 
   return (
-    <section className="w-full md:px-6 md:py-8 py-5 px-3 flex flex-col items-center">
+    <section className="mx-auto w-full max-w-7xl px-3 py-10 sm:px-10 sm:py-14 lg:px-12">
       {/* Top categories and more categories container */}
-      <div className="flex justify-between mb-5 min-w-[335px] max-w-[1506px] w-[98%]">
+      <div className="mb-6 flex w-full items-end justify-between gap-4">
         {/* Heading */}
-        <h2 className=" md:text-xl text-lg font-bold text-slate-900">
-          Top Categories
-        </h2>
+        <div>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#78816e]">Take a look around</p>
+          <h2 className="font-serif text-3xl tracking-tight text-[#24392c] sm:text-4xl">Find your next useful thing.</h2>
+        </div>
 
         {/* More categories button */}
         <button
           onClick={() => {
             router.push("/categories");
           }}
-          className="bg-black text-white px-4 md:py-2 py-1 rounded-full text-sm hover:cursor-pointer hover:bg-gray-700"
+          className="shrink-0 rounded-full border border-[#52654f]/30 px-4 py-2 text-xs font-semibold text-[#294332] transition hover:bg-[#e9eddf] sm:px-5 sm:text-sm"
         >
           More Categories
         </button>
       </div>
 
       {/* Category Row */}
-      <div className="flex max-w-full items-center gap-2 md:gap-4">
+      <div className="flex max-w-full items-center gap-2 sm:gap-4">
         {/* Left Arrow */}
         <button
           onClick={scrollLeft}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#52654f]/20 bg-[#f6f4eb] text-[#294332] transition hover:bg-[#e9eddf]"
         >
           <ChevronLeft size={17} />
         </button>
@@ -102,7 +103,7 @@ export default function BrowseCategory() {
         {/* Categories */}
         <div
           ref={scrollRef}
-          className="flex min-w-0 flex-1 gap-2 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-5"
+          className="flex min-w-0 flex-1 gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-4"
         >
           {categories.map((category) => (
             <button
@@ -112,20 +113,20 @@ export default function BrowseCategory() {
                   `/search?title=${encodeURIComponent(category.title)}`,
                 )
               }
-              className="group h-[110px] w-[85px] shrink-0 overflow-hidden rounded-lg bg-white md:h-[125px] md:w-[110px]"
+              className="group w-[130px] shrink-0 overflow-hidden rounded-2xl border border-[#e4e5da] bg-[#f8f7f0] text-left shadow-[0_3px_12px_rgba(49,66,48,0.04)] transition hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(49,66,48,0.10)] sm:w-[150px]"
             >
               {/* Image */}
-              <div className="h-[75px] w-full bg-stone-300 p-1 md:h-[90px] md:p-2">
+              <div className="h-[96px] w-full bg-[#e9eddf] p-4 sm:h-[112px] sm:p-5">
                 <img
                   src={category.image}
                   alt={category.title}
-                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                  className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-110"
                 />
               </div>
 
               {/* Category Name */}
-              <div className="flex h-[35px] items-center justify-center px-1">
-                <span className="text-center text-[10px] font-medium md:text-[11px]">
+              <div className="flex min-h-[52px] items-center px-3 py-2">
+                <span className="text-left text-xs font-medium leading-4 text-[#354638] sm:text-sm">
                   {category.title}
                 </span>
               </div>
@@ -136,7 +137,7 @@ export default function BrowseCategory() {
         {/* Right Arrow */}
         <button
           onClick={scrollRight}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#52654f]/20 bg-[#f6f4eb] text-[#294332] transition hover:bg-[#e9eddf]"
         >
           <ChevronRight size={17} />
         </button>
