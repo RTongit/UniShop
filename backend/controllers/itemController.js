@@ -152,13 +152,14 @@ async function editItem(req,res) {
     const {title : newTitle, category : newCategory, brand : newBrand, description : newDescription, price : newPrice, pickupLocation : newPickuplocation, photos : newPhotos,isSold : newIsSold} = req.body
 
     const itemId = req.params.id
+    const authUserId = req.AuthUser.userId
     try {
 
         // we check if id is in valid format : 
         if(!isValidObjectId(itemId)) return res.status(400).json({message : "Invalid objectId"})
 
-        // if the item does not exist :
-        const item = await Item.findOne({_id:itemId});
+        // Only the seller who owns this active item can edit it.
+        const item = await Item.findOne({_id:itemId, seller:authUserId, isDeleted:false});
         if(!item) return res.status(404).json({message : "Cannot edit! Item does not exist"});
 
         let updatedData = {}
@@ -184,8 +185,11 @@ async function editItem(req,res) {
         // If nothing is provided :
         if(Object.keys(updatedData).length==0) return res.status(400).json({message : "Cannot update empty fields"});
 
-        const updatedItem = await Item.findByIdAndUpdate({_id:itemId},{$set : updatedData},
+        const updatedItem = await Item.findOneAndUpdate(
+            {_id:itemId, seller:authUserId, isDeleted:false},
+            {$set : updatedData},
             {returnDocument : "after"})
+        if(!updatedItem) return res.status(404).json({message : "Cannot edit! Item does not exist"});
         return res.status(200).json(updatedItem);
     }
 
@@ -197,12 +201,17 @@ async function editItem(req,res) {
 
 async function deleteItem(req,res) {
     const itemId = req.params.id;
+    const authUserId = req.AuthUser.userId;
     try{
         // we check if id is in valid format : 
         if(!isValidObjectId(itemId)) return res.status(400).json({message : "Invalid objectId"});
 
-        // Check if item exist or not: 
-        const item = await Item.findByIdAndUpdate({_id : itemId},{$set : {isDeleted : true}},{returnDocument : "after"});
+        // Only the seller who owns this active item can soft-delete it.
+        const item = await Item.findOneAndUpdate(
+            {_id : itemId, seller : authUserId, isDeleted : false},
+            {$set : {isDeleted : true}},
+            {returnDocument : "after"}
+        );
         if(!item) return res.status(404).json({message : "Cannot delete! Item does not exist"});
 
         return res.status(200).json({message : "Item successfully deleted"});
