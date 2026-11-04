@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Camera, Check, LoaderCircle, LockKeyhole } from "lucide-react";
+import { Camera, Check, Clock3, LoaderCircle, LockKeyhole, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/app/store/authStore";
 
@@ -115,7 +115,10 @@ export default function ProfilePage() {
                 </div>
                 <div className="translate-y-1"><h1 className="text-2xl font-semibold tracking-tight text-slate-900">{profile.name}</h1><p className="mt-1 text-sm capitalize text-slate-500">{profile.role}</p></div>
               </div>
-              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium ${verified ? "bg-black text-white" : "bg-amber-50 text-amber-800"}`}><Check size={15} />{verified ? "Verified" : profile.verificationStatus}</span>
+              <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium ${verified ? "bg-black text-white" : "bg-amber-50 text-amber-800"}`}>
+                {verified ? <Check size={15} /> : profile.verificationStatus === "pending" ? <Clock3 size={15} /> : <X size={15} />}
+                {verified ? "Verified" : profile.verificationStatus}
+              </span>
             </div>
 
             <div className="mt-8 border-t border-slate-100 pt-6">

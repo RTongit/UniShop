@@ -259,7 +259,7 @@ export default function ItemPage({ params }) {
 
             <div className="flex items-center gap-6 text-xs text-gray-500 mb-4">
               <span> Joined : {formatDate(singleItem.sellerInfo.joinedAt)}</span>
-              <span className="inline-flex items-center gap-1.5"><University size={14} strokeWidth={1.8} /> Nondu</span>
+              <span className="inline-flex items-center gap-1.5"><University size={14} strokeWidth={1.8} /> GCU</span>
             </div>
 
             {/* <Link href={`/search`} className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-xl py-2.5 transition-colors">

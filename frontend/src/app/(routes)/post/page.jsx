@@ -31,6 +31,7 @@ const PICKUP_LOCATIONS = [
   "Cafeteria",
   "Main Gate",
   "Sports Ground",
+  "Department Block",
 ];
 
 function handleUnverifiedAccess() {

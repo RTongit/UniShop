@@ -5,8 +5,8 @@ export default function ItemCard({ item }) {
     <Link href={`/item/${item._id}`} className="flex md:h-[300px] h-[200px]" >
 
         {/* Picture */}
-        <div className="md:min-w-[280px] min-w-[140px] h-full bg-stone-100 p-2">
-          <img src={item.photos[0]} className="w-full h-full object-contain"></img>
+        <div className="h-full w-[140px] shrink-0 overflow-hidden bg-stone-100 p-2 md:w-[280px]">
+          <img src={item.photos[0]} alt={item.title} className="block h-full w-full object-cover" />
         </div>
 
         <div className="p-3 overflow-hidden flex flex-col gap-y-3">

@@ -10,8 +10,8 @@ import {
   Loader2,
   Lock,
   Mail,
-  MessageSquare,
   Phone,
+  School,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -27,7 +27,7 @@ export default function SignupPage() {
   const [enrollmentId, setEnrollmentId] = useState("");
   const [password, setPassword] = useState("");
   const [department, setDepartment] = useState("");
-  const [graduationYear, setGraduationYear] = useState(2000);
+  const [graduationYear, setGraduationYear] = useState(2028);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email,setEmail] = useState("");
 
@@ -124,8 +124,8 @@ export default function SignupPage() {
                     className="size-12 rounded-xl bg-amber-400 flex items-center justify-center 
                           group-hover:bg-amber-500 transition-colors"
                   >
-                    {/* Message Icon */}
-                    <MessageSquare className="size-6" />
+                    {/* School Icon */}
+                    <School size={20} />
                   </div>
 
                   {/* Title */}
