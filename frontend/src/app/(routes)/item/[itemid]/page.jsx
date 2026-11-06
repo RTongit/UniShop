@@ -170,12 +170,19 @@ export default function ItemPage({ params }) {
 
             <div>
               {/* CTA Buttons */}
-              {singleItem.isSold ? (
+              {singleItem.status === "sold" ? (
                 <button
                   disabled
                   className=" cursor-not-allowed bg-gray-400 text-white rounded-sm p-3 md:text-lg text-sm font-semibold mb-3 transition-colors mt-3"
                 >
                   Item Already Sold
+                </button>
+              ) : singleItem.status === "reserved" ? (
+                <button
+                  disabled
+                  className="cursor-not-allowed bg-amber-100 text-amber-900 rounded-sm p-3 md:text-lg text-sm font-semibold mb-3 mt-3"
+                >
+                  Item Reserved
                 </button>
               ) : (
                 <>

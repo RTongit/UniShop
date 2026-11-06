@@ -74,16 +74,13 @@ export default function ListingPage() {
 
     for (let i = 0; i < selectedFilter.length; i++) {
       if (selectedFilter[i] == "Sold") {
-        let FilteredArr = myItems.filter((item) => {
-          if (item.isSold) return true;
-          return false;
-        });
+        let FilteredArr = myItems.filter((item) => item.status === "sold");
         tempArr = [...tempArr, ...FilteredArr];
       } else if (selectedFilter[i] == "Available") {
-        let FilteredArr = myItems.filter((item) => {
-          if (item.isSold) return false;
-          return true;
-        });
+        let FilteredArr = myItems.filter((item) => item.status === "available");
+        tempArr = [...tempArr, ...FilteredArr];
+      } else if (selectedFilter[i] == "Reserved") {
+        let FilteredArr = myItems.filter((item) => item.status === "reserved");
         tempArr = [...tempArr, ...FilteredArr];
       }
     }
@@ -160,7 +157,7 @@ export default function ListingPage() {
 
         {/* Container of  Sold, Available,Apply, Reset button*/}
         <div className={`bg-white ${isFilterOpen ? "block" : "hidden"} md:block py-2`}>
-          {/* Sold, Available checkbox*/}
+          {/* Listing status filters */}
           <div className="flex  md:flex-col flex-row gap-3 bg-white px-4 py-2">
               <label className="flex gap-x-3 hover:cursor-pointer">
                 <input
@@ -190,6 +187,16 @@ export default function ListingPage() {
                   }}
                 />
                 <span>Available</span>
+              </label>
+              <label className="flex gap-x-3 hover:cursor-pointer">
+                <input
+                  className="size-5 hover:cursor-pointer"
+                  type="checkbox"
+                  value="Reserved"
+                  checked={selectedFilter.includes("Reserved")}
+                  onChange={handleInputChange}
+                />
+                <span>Reserved</span>
               </label>
           </div>
 
@@ -252,7 +259,9 @@ export default function ListingPage() {
                 />
 
                 {/* Availabilty  Badge */}
-                {item.isSold ? <Sold /> : null}
+                {item.status === "sold" ? <Sold /> : item.status === "reserved" ? (
+                  <span className="absolute left-3 top-3 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">Reserved</span>
+                ) : null}
               </div>
 
               {/* Information section */}
@@ -297,16 +306,20 @@ export default function ListingPage() {
                   onClick={(e) => {
                     async function fetchItems() {
                       const response = await editItem(item._id, {
-                        isSold: !item.isSold,
+                        status: item.status === "sold" ? "available" : "sold",
                       });
                       if (response) setItems(response);
                     }
                     fetchItems();
                   }}
                 >
-                  {item.isSold ? (
+                  {item.status === "sold" ? (
                     <div className=" flex flex-row gap-x-2  p-2 text-black rounded-xl">
                       <RotateCcw /> <span>Restock</span>
+                    </div>
+                  ) : item.status === "reserved" ? (
+                    <div className="flex flex-row gap-x-2 p-2 text-amber-800 rounded-xl">
+                      <span>Reserved</span>
                     </div>
                   ) : (
                     <div className=" flex flex-row gap-x-2  p-2 text-black  rounded-xl">

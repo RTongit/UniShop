@@ -75,7 +75,7 @@ async function searchItems(req,res) {
                   ]
                 },
                 {isDeleted : false},
-                {isSold : false}
+                {status : "available"}
             ]
         }
         ).sort({createdAt :-1});
@@ -113,7 +113,7 @@ async function getSingleItem(req,res) {
         description : item.description,
         price : item.price,
         photos : item.photos,
-        isSold : item.isSold,
+        status : item.status,
         createdAt : item.createdAt,
         profilePic : seller.profilePic,
         sellerInfo : {
@@ -149,7 +149,7 @@ async function getMyItems(req,res) {
 }
 
 async function editItem(req,res) {
-    const {title : newTitle, category : newCategory, brand : newBrand, description : newDescription, price : newPrice, pickupLocation : newPickuplocation, photos : newPhotos,isSold : newIsSold} = req.body
+    const {title : newTitle, category : newCategory, brand : newBrand, description : newDescription, price : newPrice, pickupLocation : newPickuplocation, photos : newPhotos, status : newStatus} = req.body
 
     const itemId = req.params.id
     const authUserId = req.AuthUser.userId
@@ -179,8 +179,15 @@ async function editItem(req,res) {
             updatedData.photos = dummyPhotos;
         }
         
-        // Need to check thoroughly
-        if (newIsSold!=item.isSold) updatedData.isSold = newIsSold;
+        if (newStatus !== undefined) {
+            if (!['available', 'sold'].includes(newStatus)) {
+                return res.status(400).json({message : "Invalid item status"});
+            }
+            if (item.status === "reserved") {
+                return res.status(409).json({message : "A reserved item cannot be manually restocked or marked sold"});
+            }
+            if (newStatus !== item.status) updatedData.status = newStatus;
+        }
 
         // If nothing is provided :
         if(Object.keys(updatedData).length==0) return res.status(400).json({message : "Cannot update empty fields"});

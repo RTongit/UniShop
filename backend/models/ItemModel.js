@@ -52,10 +52,11 @@ const ItemSchema = new mongoose.Schema(
             required : true
         },
 
-        // todo : need to enhance
-        isSold : {
-            type : Boolean,
-            default : false
+        status : {
+            type : String,
+            enum : ["available", "reserved", "sold"],
+            default : "available",
+            required : true
         },
         pickupLocation: {
             type : String,
