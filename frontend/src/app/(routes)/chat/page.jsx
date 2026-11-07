@@ -47,7 +47,7 @@ export default function ChatPage() {
             <div className="flex md:flex-row flex-col h-[calc(100vh-122px)] lg:h-[calc(100vh-78px)] bg-stone-100 p-3 gap-x-3">
                 
                 {/* Side bar containing chats */}
-                <div className="gap-y-3 min-w-[280px] rounded-md h-full md:flex md:flex-col overflow-y-auto">
+                <div className="gap-y-3 w-full min-w-0 rounded-md h-full md:flex md:w-[360px] md:min-w-[360px] md:flex-none md:flex-col overflow-y-auto">
                     <SideBar/>
                 </div>
 

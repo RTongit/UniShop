@@ -5,6 +5,7 @@ import { isValidObjectId } from "mongoose";
 import Chat from "../models/ChatModel.js";
 import Purchase from "../models/Purchase.js";
 import { randomInt } from "node:crypto";
+import { sendReservationCodeEmail } from "../lib/emailService.js";
 
 async function postItem(req,res) {
     const {title,category,brand,description,price,pickupLocation,photos} = req.body
@@ -247,10 +248,6 @@ async function reserveItem(req,res) {
         const existingItem = await Item.findOne({_id : itemId,seller : {$ne : authUserId}, status : "available"})
         if(!existingItem) return res.status(409).json({message : "Item is no longer available."});
 
-        // check if active purchase object for that item exist : 
-        const activePurchase = await Purchase.findOne({item : itemId,status : "reserved"});
-        if(activePurchase) return res.status(409).json({message : "An active reservation already exist for the item"});
-
         // Atomically claim the item. Only one concurrent request can succeed.
         const reservedItem = await Item.findOneAndUpdate(
             {
@@ -270,14 +267,12 @@ async function reserveItem(req,res) {
         const salt = await bcrypt.genSalt(10);
         const hashedCode = await bcrypt.hash(code,salt);
 
-        // todo : code will be send as email to the buyer : 
-
         // generate the purchase item : 
         const newPurchase =  new Purchase({
-            item : itemId,
+            item : reservedItem._id,
             buyer : authUserId,
-            seller : existingItem.seller,
-            pickupLocation : existingItem.pickupLocation,
+            seller : reservedItem.seller,
+            pickupLocation : reservedItem.pickupLocation,
             status : "reserved",
             verificationCodeHash : hashedCode,
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
@@ -300,11 +295,38 @@ async function reserveItem(req,res) {
             throw saveError
         }
 
+        // code will be send as email to the buyer : 
+        try {
+            const buyer = await User.findOne({_id : authUserId}).select({email : 1})
+            if(!buyer) throw new Error("Could not find the buyer's email address.")
+
+            // if email sending fails , then the emailError catch runs : 
+            await sendReservationCodeEmail(buyer.email,code,existingItem.title)
+        }
+        catch(emailError) {
+            // Marks the purchase cancel if email fails: 
+            await Purchase.findOneAndUpdate(
+                {_id : newPurchase._id,status : "reserved"}, 
+                {$set : {status :"cancelled"}},
+            )
+
+            // Undo the item status change if saving the purchase failed.
+            await Item.findOneAndUpdate(
+                {
+                   _id: itemId,
+                   seller: { $ne: authUserId  },
+                   status: "reserved",
+                },
+                { $set: { status: "available" } },
+            )
+            throw emailError
+        }
+
         // a success message will be send to the frontend
         return res.status(201).json({
             message : "Item reserved successfully.",
-            itemName : existingItem.title,
-            pickupLocation : existingItem.pickupLocation
+            itemName : reservedItem.title,
+            pickupLocation : reservedItem.pickupLocation
         })
 
     }
@@ -315,4 +337,6 @@ async function reserveItem(req,res) {
     }
 }
 
-export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem}
+async function unreserveItem(req,res) {}
+
+export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem,unreserveItem}

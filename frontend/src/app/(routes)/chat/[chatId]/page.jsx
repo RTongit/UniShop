@@ -56,7 +56,7 @@ export default function MessagePage({ params }) {
     <div className="flex h-[calc(100dvh-150px)] flex-col overflow-hidden bg-stone-100 p-2 md:h-[calc(100dvh-122px)] md:flex-row md:gap-x-3 md:p-3 lg:h-[calc(100dvh-78px)]">
       
       {/* Side bar containing chats */}
-      <div className="gap-y-3 min-w-[280px] rounded-md h-full md:flex md:flex-col hidden overflow-y-auto">
+      <div className="gap-y-3 hidden w-full min-w-0 rounded-md h-full overflow-y-auto md:flex md:w-[360px] md:min-w-[360px] md:flex-none md:flex-col">
         <SideBar />
       </div>
 

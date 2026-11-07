@@ -7,15 +7,15 @@ import formatDate from "../constant/formatDate.js";
 import { useRouter } from "next/navigation.js";
 
 export default function SideBar() {
-  const { myChats, setMyChats, unsetMyChats, selectedChat, setSelectedChat,markChatAsRead } = useChatStore();
+  const { myChats, setMyChats, unsetMyChats, selectedChat, setSelectedChat,markChatAsRead, chatFilter, setChatFilter } = useChatStore();
   const { authUser,socket} = useAuthStore();
   const router = useRouter()
-  const [activeFilter, setActiveFilter] = useState("All");
   const [onlineUsers, setOnlineUsers] = useState([]);
+
   const filteredChats = myChats.filter((chat) => {
-    if (activeFilter === "All") return true;
+    if (chatFilter === "All") return true;
     const currentUserIsBuyer = authUser.userId.toString() === chat.buyer._id.toString();
-    return activeFilter === "Sellers" ? currentUserIsBuyer : !currentUserIsBuyer;
+    return chatFilter === "Buying" ? currentUserIsBuyer : !currentUserIsBuyer;
   });
 
   useEffect(()=>{
@@ -46,19 +46,21 @@ export default function SideBar() {
 
   return (
     <div className="flex h-full w-full min-h-0 flex-col bg-white px-2 py-2">
+      {/* Filter button */}
       <div className="mb-2 flex shrink-0 gap-1 rounded-xl border border-gray-200 bg-white p-1">
-        {["All", "Buyers", "Sellers"].map((filter) => (
+        {["All", "Buying", "Selling"].map((filter) => (
           <button
             key={filter}
             type="button"
-            aria-pressed={activeFilter === filter}
-            onClick={() => setActiveFilter(filter)}
-            className={`flex-1 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${activeFilter === filter ? "bg-black text-white" : "text-gray-700 hover:bg-gray-100"}`}
+            aria-pressed={chatFilter === filter}
+            onClick={() => setChatFilter(filter)}
+            className={`flex-1 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${chatFilter === filter ? "bg-black text-white" : "text-gray-700 hover:bg-gray-100"}`}
           >
             {filter}
           </button>
         ))}
       </div>
+
       <div className="flex min-h-0 flex-1 flex-col gap-y-3 overflow-y-auto">
       {filteredChats.map((chat, i) => (
         <button

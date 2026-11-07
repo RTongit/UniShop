@@ -6,6 +6,9 @@ import { useAuthStore } from "./authStore";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const useChatStore = create((set,get)=>({
+    chatFilter : "All",
+    setChatFilter : function(value) { set({chatFilter : value}) },
+
     selectedChat : null,
     setSelectedChat : function(data) {
         set({selectedChat : data})
@@ -15,6 +18,7 @@ export const useChatStore = create((set,get)=>({
     setUnreadChatCount : function (val) { set({unreadChatCount : val})},
 
     myChats : [],
+
     setMyChats : function (targetId,isBuyer) {
         set((state)=>(
             {
@@ -27,6 +31,7 @@ export const useChatStore = create((set,get)=>({
             }
         ))
     },
+
     unsetMyChats : function (targetId,isBuyer) { 
         set((state)=>(
             {
@@ -39,7 +44,9 @@ export const useChatStore = create((set,get)=>({
             }
         ))
     },
+    
     isChatsLoading : true,
+
     getChats : async function() {
         set({myChats : []});
         set({isChatsLoading : true});
@@ -67,6 +74,7 @@ export const useChatStore = create((set,get)=>({
     },
 
     isPostingChat : false,
+    
     postChat : async function(data) {
         set({isPostingChat : true})
         try {

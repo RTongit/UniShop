@@ -64,7 +64,7 @@ async function postChat(req, res) {
     await newChat.populate([
       { path: "buyer", select: "name profilePic" },
       { path: "seller", select: "name profilePic" },
-      { path: "item", select: "title" },
+      { path: "item", select: "title price photos status" },
     ]);
 
     return res.status(201).json(newChat);
@@ -82,7 +82,7 @@ async function getChats(req, res) {
     })
       .populate("buyer", "name profilePic")
       .populate("seller", "name profilePic")
-      .populate("item", "title")
+      .populate("item", "title price photos status")
       .lean();
 
     await Promise.all(

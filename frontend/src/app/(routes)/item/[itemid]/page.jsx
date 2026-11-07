@@ -196,7 +196,7 @@ export default function ItemPage({ params }) {
                             // Here response this the populated chat document
                             const response = await postChat({
                                seller : singleItem.sellerInfo.sellerId,
-                               item : singleItem.id
+                               item : singleItem.id,
                             });
                             if(response!=null) {
                               setSelectedChat(response)

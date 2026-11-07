@@ -286,7 +286,7 @@ const MessageContainer = ({ chatId }) => {
       {/* UI-only reservation bar; wire its controls to the Purchase flow later. */}
       <div className="flex min-h-[68px] shrink-0 flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 py-2 sm:flex-nowrap sm:gap-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-400 sm:size-12">
+          <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-400 sm:size-12 overflow-hidden">
             {selectedChat.item?.photos?.[0] ? (
               <img
                 src={selectedChat.item.photos[0]}
@@ -305,20 +305,37 @@ const MessageContainer = ({ chatId }) => {
               {selectedChat.item?.price != null && (
                 <span>₹{Number(selectedChat.item.price).toLocaleString("en-IN")}</span>
               )}
-              {selectedChat.item?.price != null && <span aria-hidden="true">·</span>}
-              <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Reserved</span>
+              {selectedChat.item?.price != null && selectedChat.item?.status==="reserved" ? 
+                (<span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Reserved</span>)
+                :
+                (selectedChat.item?.price != null && selectedChat.item?.status==="sold" ? 
+                  (<span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Sold</span>) 
+                  :
+                  null
+                )
+              }
+              
             </div>
           </div>
         </div>
 
-        {authUser.userId === selectedChat.buyer._id.toString() && (
+        {authUser.userId === selectedChat.buyer._id.toString() && 
+        (
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <button type="button" className="rounded-md bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm">
-              Reserve
-            </button>
-            <button type="button" className="rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] font-semibold text-slate-800 sm:px-4 sm:text-sm">
-              Resend code
-            </button>
+            {/* Only an available item be reserved*/}
+            {(selectedChat.item?.status === "available") ? 
+              (<button type="button" className="rounded-md bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm">
+                Reserve
+              </button>)
+              : 
+              (selectedChat.item?.status === "reserved") ? (<button type="button" className="rounded-md bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm">Undo</button>) : null
+            }
+            {(selectedChat.item?.status === "reserved") ? 
+             (<button type="button" className="rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] font-semibold text-slate-800 sm:px-4 sm:text-sm">Resend code</button>) 
+             :
+             null
+            }
+
           </div>
         )}
       </div>
