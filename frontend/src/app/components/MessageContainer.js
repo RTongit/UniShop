@@ -1,6 +1,6 @@
 "use client";
 
-import { Cross, LoaderCircle, Paperclip, Send, X } from "lucide-react";
+import { Cross, Image as ImageIcon, LoaderCircle, Paperclip, Send, X } from "lucide-react";
 import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/authStore";
 import Message from "./Message";
@@ -281,6 +281,46 @@ const MessageContainer = ({ chatId }) => {
 
         {/* Actions todo need to implement three dots feature later */}
 
+      </div>
+
+      {/* UI-only reservation bar; wire its controls to the Purchase flow later. */}
+      <div className="flex min-h-[68px] shrink-0 flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 py-2 sm:flex-nowrap sm:gap-3 sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-400 sm:size-12">
+            {selectedChat.item?.photos?.[0] ? (
+              <img
+                src={selectedChat.item.photos[0]}
+                alt=""
+                className="size-full rounded-lg object-cover"
+              />
+            ) : (
+              <ImageIcon size={21} />
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-900 sm:text-base">
+              {selectedChat.item?.title || "Listing"}
+            </p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500 sm:text-sm">
+              {selectedChat.item?.price != null && (
+                <span>₹{Number(selectedChat.item.price).toLocaleString("en-IN")}</span>
+              )}
+              {selectedChat.item?.price != null && <span aria-hidden="true">·</span>}
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Reserved</span>
+            </div>
+          </div>
+        </div>
+
+        {authUser.userId === selectedChat.buyer._id.toString() && (
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <button type="button" className="rounded-md bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm">
+              Reserve
+            </button>
+            <button type="button" className="rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] font-semibold text-slate-800 sm:px-4 sm:text-sm">
+              Resend code
+            </button>
+          </div>
+        )}
       </div>
 
       {/*Messages logs section*/}

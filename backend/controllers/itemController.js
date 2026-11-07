@@ -2,6 +2,9 @@ import cloudinary from "../lib/cloudinary.js";
 import Item from "../models/ItemModel.js";
 import User from "../models/UserModel.js";
 import { isValidObjectId } from "mongoose";
+import Chat from "../models/ChatModel.js";
+import Purchase from "../models/Purchase.js";
+import { randomInt } from "node:crypto";
 
 async function postItem(req,res) {
     const {title,category,brand,description,price,pickupLocation,photos} = req.body
@@ -229,4 +232,87 @@ async function deleteItem(req,res) {
     }
 }
 
-export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem}
+async function reserveItem(req,res) {
+    const itemId = req.params.id;
+    const authUserId = req.AuthUser.userId
+    try {
+        // we check if id is in valid format : 
+        if(!isValidObjectId(itemId)) return res.status(400).json({message : "Invalid objectId"});
+
+        // check if the Authuser is buyer or not  : 
+        const existingChat = await Chat.findOne({buyer : authUserId,item :itemId})
+        if(!existingChat) return res.status(404).json({message : "Start a chat with the seller before reserving this item."});
+
+        // check for the item validity and it is available or not : 
+        const existingItem = await Item.findOne({_id : itemId,seller : {$ne : authUserId}, status : "available"})
+        if(!existingItem) return res.status(409).json({message : "Item is no longer available."});
+
+        // check if active purchase object for that item exist : 
+        const activePurchase = await Purchase.findOne({item : itemId,status : "reserved"});
+        if(activePurchase) return res.status(409).json({message : "An active reservation already exist for the item"});
+
+        // Atomically claim the item. Only one concurrent request can succeed.
+        const reservedItem = await Item.findOneAndUpdate(
+            {
+                _id: itemId,
+                seller: { $ne: authUserId  },
+                status: "available",
+            },
+            { $set: { status: "reserved" } },
+            {returnDocument : "after"}
+        )
+        if(!reservedItem) return res.status(409).json({message: "Item is no longer available."});
+
+        // generate the random 6 digit code : 
+        const code = randomInt(100000, 1_000_000).toString();
+
+        // Hash the code
+        const salt = await bcrypt.genSalt(10);
+        const hashedCode = await bcrypt.hash(code,salt);
+
+        // todo : code will be send as email to the buyer : 
+
+        // generate the purchase item : 
+        const newPurchase =  new Purchase({
+            item : itemId,
+            buyer : authUserId,
+            seller : existingItem.seller,
+            pickupLocation : existingItem.pickupLocation,
+            status : "reserved",
+            verificationCodeHash : hashedCode,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            completedAt : null
+        })
+
+        try {
+            await newPurchase.save();
+        }
+        catch(saveError) {
+            // Undo the item status change if saving the purchase failed.
+            await Item.findOneAndUpdate(
+                {
+                   _id: itemId,
+                   seller: { $ne: authUserId  },
+                   status: "reserved",
+                },
+                { $set: { status: "available" } },
+            )
+            throw saveError
+        }
+
+        // a success message will be send to the frontend
+        return res.status(201).json({
+            message : "Item reserved successfully.",
+            itemName : existingItem.title,
+            pickupLocation : existingItem.pickupLocation
+        })
+
+    }
+
+    catch(error) {
+        console.log(`Error in reserveItem controller : ${error.message}`);
+        return res.status(500).json({message : "Internal Server Error"});
+    }
+}
+
+export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem}
