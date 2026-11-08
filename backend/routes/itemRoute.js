@@ -1,5 +1,5 @@
 import express from "express"
-import { deleteItem, searchItems, postItem, getSingleItem, getMyItems, editItem, reserveItem } from "../controllers/itemController.js";
+import { deleteItem, searchItems, postItem, getSingleItem, getMyItems, editItem, reserveItem, undoReserve } from "../controllers/itemController.js";
 import protectRoute from "../middleware/protectRoute.js";
 import isVerified from "../middleware/isVerified.js";
 
@@ -19,5 +19,8 @@ itemRouter.delete('/delete/:id',protectRoute,isVerified,deleteItem);
 
 // reserve item api : 
 itemRouter.post('/reserve/:id',protectRoute,isVerified,reserveItem);
+
+// undo reserve item api 
+itemRouter.post('/undoReserve/:id',protectRoute,isVerified,undoReserve);
 
 export default itemRouter;

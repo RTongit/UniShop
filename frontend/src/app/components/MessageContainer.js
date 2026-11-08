@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Spinner from "./Spinner";
 import { useRouter } from "next/navigation";
+import { useItemStore } from "../store/itemStore";
 
 // dummy data :
 const MessageColor = {
@@ -143,6 +144,8 @@ const MessageContainer = ({ chatId }) => {
     unsubscribeFromMessage,
   } = useChatStore();
   const { authUser, socket } = useAuthStore();
+  const {reserveItem,isReserving} = useItemStore()
+
   const [text, setText] = useState("");
   const [image, setImage] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -324,12 +327,26 @@ const MessageContainer = ({ chatId }) => {
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {/* Only an available item be reserved*/}
             {(selectedChat.item?.status === "available") ? 
-              (<button type="button" className="rounded-md bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm">
-                Reserve
+              (<button type="button" className="rounded-md bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm"
+              onClick={async ()=>{
+                const result = await reserveItem(selectedChat.item._id);
+                if(result==false) return;
+
+                // below code will only run if it is reserved in backend
+                if(result==true) {
+                  setSelectedChat(
+                    {...selectedChat,
+                      item : {...selectedChat.item,status : "reserved"}
+                    })
+                }
+              }}
+              >
+                {isReserving ? "Reserving..." : "Reserve"}
               </button>)
               : 
               (selectedChat.item?.status === "reserved") ? (<button type="button" className="rounded-md bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm">Undo</button>) : null
             }
+            
             {(selectedChat.item?.status === "reserved") ? 
              (<button type="button" className="rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] font-semibold text-slate-800 sm:px-4 sm:text-sm">Resend code</button>) 
              :
@@ -396,7 +413,7 @@ const MessageContainer = ({ chatId }) => {
 
       {/* Send Text and files section */}
       <form
-        className="mx-2 my-2 flex h-14 shrink-0 box-border rounded-md bg-stone-200 sm:mx-5 sm:my-5 sm:h-20"
+        className="mx-2 my-2 flex h-14 shrink-0 box-border rounded-md bg-stone-200 sm:mx-5 sm:my-3 sm:h-16"
         onSubmit={(e) => {
           handleSubmit(e);
         }}

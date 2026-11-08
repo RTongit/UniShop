@@ -6,6 +6,7 @@ import Chat from "../models/ChatModel.js";
 import Purchase from "../models/Purchase.js";
 import { randomInt } from "node:crypto";
 import { sendReservationCodeEmail } from "../lib/emailService.js";
+import bcrypt from "bcryptjs"
 
 async function postItem(req,res) {
     const {title,category,brand,description,price,pickupLocation,photos} = req.body
@@ -337,6 +338,6 @@ async function reserveItem(req,res) {
     }
 }
 
-async function unreserveItem(req,res) {}
+async function undoReserve(req,res) {}
 
-export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem,unreserveItem}
+export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem,undoReserve}

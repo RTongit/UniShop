@@ -10,6 +10,7 @@ export const useItemStore = create((set,get)=>({
     isPosting : false,
     isSearching : false,
     hasSearched : false,
+
     postItem : async function(data) {
         
         set({isPosting : true})
@@ -132,8 +133,8 @@ export const useItemStore = create((set,get)=>({
     },
     
     isLoadingItemToBeEdited : true,
-    isEditing : false,
 
+    isEditing : false,
     editItem : async function(itemId,data) {
         set({isEditing : true})
         try {
@@ -198,5 +199,35 @@ export const useItemStore = create((set,get)=>({
             toast.error(error.message);
             return null;
         }
+    },
+
+    isReserving : false,
+    reserveItem : async function (ItemId) {
+        set({isReserving : true});
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/items/reserve/${ItemId}`,
+                {
+                    method : "POST",
+                    headers : {'Content-Type': 'application/json'},
+                    credentials : "include",
+                    cache : "no-store",
+                }
+            )
+            const response = await res.json();
+            if(!res.ok) {
+                throw new Error(response.message);
+            }
+            toast.success("Item reserved successfully");
+            return true;
+        }
+
+        catch(error) {
+            toast.error(error.message);
+            return false;
+        }
+        finally {
+            set({isReserving : false})
+        }
     }
+
 }));
