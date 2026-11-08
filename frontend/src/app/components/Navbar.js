@@ -56,11 +56,11 @@ export default function Navbar() {
   }
   
   return (
-    <div className="bg-white border-b border-gray-200 md:px-6 py-4 px-3 flex items-center sticky top-0 z-10">
-      <div className="flex lg:flex-row flex-col justify-between items-center w-full gap-4 ">
+    <div className="sticky top-0 z-10 flex items-center border-b border-gray-200 bg-white px-3 py-2 sm:py-3 md:px-6 md:py-4">
+      <div className="flex w-full flex-col items-center justify-between gap-2 sm:gap-4 lg:flex-row">
 
         {/* Left section Unishop logo and search */}
-        <div className="flex lg:flex-row flex-col gap-x-6 lg:gap-y-0 gap-y-2 w-full">
+        <div className="flex w-full flex-col gap-x-6 gap-y-1.5 lg:flex-row lg:gap-y-0">
 
           <div className="text-lg font-bold whitespace-nowrap flex justify-between">
             {/*UniShop Logo */}
@@ -71,7 +71,7 @@ export default function Navbar() {
               </Link>
             </div>
 
-            <div className=" flex gap-5 items-center lg:hidden">
+            <div className="flex items-center gap-3 lg:hidden">
               {authUser ? (
               <ProfileDropDown
                 user={authUser}
@@ -84,8 +84,8 @@ export default function Navbar() {
                   if (authUser.verificationStatus !== "verified") {handleUnverifiedAccess("Your account must be verified to post an item.")}
                   else router.push("/post" )
                 }} 
-                className="flex gap-2 items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100">
-                  <Plus /> <span className="hidden lg:block">Sell</span>
+                className="flex items-center gap-2 rounded-xl border-2 p-1.5 hover:border-pink-100 hover:ring-2 hover:ring-pink-100">
+                  <Plus size={20} /> <span className="hidden lg:block">Sell</span>
               </button>) 
               : null
               }
@@ -96,9 +96,9 @@ export default function Navbar() {
                   if (authUser.verificationStatus !== "verified") {handleUnverifiedAccess("Your account must be verified to access chat section.")}
                   else router.push("/chat")
                 }} 
-                className="flex gap-2 relative items-center border-2 p-2 rounded-2xl hover:ring-2 hover:ring-pink-100 hover:border-pink-100"
+                className="relative flex items-center gap-2 rounded-xl border-2 p-1.5 hover:border-pink-100 hover:ring-2 hover:ring-pink-100"
                  >
-                 <MessageCircle />
+                 <MessageCircle size={20} />
 
                   {unreadChatCount>0 ? 
                     (<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-[#DC143C]" />)
@@ -123,7 +123,7 @@ export default function Navbar() {
               value={item}
               placeholder="Search laptops, books, cycles..."
               aria-label="Search marketplace"
-              className="min-w-0 flex-1 bg-transparent px-1 py-1 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:py-2.5"
+              className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:py-2.5"
               onChange={(e) => setItem(e.target.value)}
             />
             <button
@@ -131,7 +131,7 @@ export default function Navbar() {
               aria-label="Search"
               title="Search"
               disabled={!item.trim()}
-              className={`inline-flex shrink-0 items-center justify-center rounded-xl px-3 py-2 transition-colors sm:py-2.5 ${item.trim() ? "bg-blue-100 text-slate-900 hover:bg-blue-200" : "cursor-not-allowed bg-slate-200 text-slate-400"}`}
+              className={`inline-flex shrink-0 items-center justify-center rounded-xl px-3 py-2.5 transition-colors sm:py-2.5 ${item.trim() ? "bg-blue-100 text-slate-900 hover:bg-blue-200" : "cursor-not-allowed bg-slate-200 text-slate-400"}`}
             >
               <Search size={20} strokeWidth={2.25} aria-hidden="true" />
             </button>

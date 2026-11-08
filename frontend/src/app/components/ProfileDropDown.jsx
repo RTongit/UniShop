@@ -41,10 +41,10 @@ export default function ProfileDropdown() {
           <img
             src={user.profilePic}
             alt={user.name}
-            className="w-9 h-9 rounded-full object-cover ring-2 ring-white"
+            className="h-8 w-8 rounded-full object-cover ring-2 ring-white sm:h-9 sm:w-9"
           />
         ) : (
-          <div className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-600 text-sm font-bold text-white ring-2 ring-white sm:h-9 sm:w-9">
             {authUser?.name?.charAt(0).toUpperCase() || "U"}
           </div>
         )}
