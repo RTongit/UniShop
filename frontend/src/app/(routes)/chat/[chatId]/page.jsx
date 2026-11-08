@@ -53,7 +53,7 @@ export default function MessagePage({ params }) {
   if (isMessagesLoading) return <Spinner />;
 
   return (
-    <div className="flex h-[calc(100dvh-150px)] flex-col overflow-hidden bg-stone-100 p-2 md:h-[calc(100dvh-122px)] md:flex-row md:gap-x-3 md:p-3 lg:h-[calc(100dvh-78px)]">
+    <div className="flex h-[calc(100dvh-109px)] flex-col overflow-hidden bg-stone-100 p-2 sm:h-[calc(100dvh-121px)] md:h-[calc(100dvh-122px)] md:flex-row md:gap-x-3 md:p-3 lg:h-[calc(100dvh-78px)]">
       
       {/* Side bar containing chats */}
       <div className="gap-y-3 hidden w-full min-w-0 rounded-md h-full overflow-y-auto md:flex md:w-[360px] md:min-w-[360px] md:flex-none md:flex-col">

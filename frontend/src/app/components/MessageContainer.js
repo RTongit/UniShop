@@ -238,7 +238,7 @@ const MessageContainer = ({ chatId }) => {
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
       
       {/* Header containing userToChat name and its profilePic and cross*/}
-      <div className="flex h-15 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 py-2 sm:px-6">
+      <div className="flex h-[60px] shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 py-1 sm:h-15 sm:px-6 sm:py-2">
         
         {/* Profile */}
         <div className="flex items-center gap-3 ">
@@ -250,7 +250,7 @@ const MessageContainer = ({ chatId }) => {
                   : selectedChat.buyer.profilePic || "/defaultProfilePic.jpg"
               }`}
               alt="photo"
-              className="md:size-12 size-11 rounded-full object-cover"
+              className="size-10 rounded-full object-cover sm:size-11 md:size-12"
             />
             {otherUserId && onlineUsers.includes(otherUserId) && (
               <span title="Online" className="absolute bottom-2 right-0.5 size-3 rounded-full bg-green-600" />
@@ -287,7 +287,7 @@ const MessageContainer = ({ chatId }) => {
       </div>
 
       {/* UI-only reservation bar; wire its controls to the Purchase flow later. */}
-      <div className="flex min-h-[60px] shrink-0 flex-nowrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-2 py-2 sm:min-h-[68px] sm:gap-3 sm:px-5">
+      <div className="flex h-[60px] min-h-[60px] shrink-0 flex-nowrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-2 py-2 sm:h-auto sm:min-h-[68px] sm:gap-3 sm:px-5">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <div className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-lg bg-slate-100 text-slate-400 sm:size-12">
             {selectedChat.item?.photos?.[0] ? (
@@ -415,7 +415,7 @@ const MessageContainer = ({ chatId }) => {
 
       {/* Send Text and files section */}
       <form
-        className="mx-2 my-2 flex h-14 shrink-0 box-border rounded-md bg-stone-200 sm:mx-5 sm:my-3 sm:h-16"
+        className="mx-2 mb-2 mt-auto flex h-14 shrink-0 box-border rounded-md bg-stone-200 sm:mx-5 sm:my-3 sm:h-16"
         onSubmit={(e) => {
           handleSubmit(e);
         }}
