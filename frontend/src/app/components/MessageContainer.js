@@ -327,8 +327,10 @@ const MessageContainer = ({ chatId }) => {
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {/* Only an available item be reserved*/}
             {(selectedChat.item?.status === "available") ? 
-              (<button type="button" className="rounded-md bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm"
-              onClick={async ()=>{
+              (<button type="button" 
+                className="rounded-md disabled:bg-gray-400 disabled:opacity-60 bg-black px-2.5 py-2 text-[11px] font-semibold text-white sm:px-4 sm:text-sm"
+                disabled = {isReserving}
+                onClick={async ()=>{
                 const result = await reserveItem(selectedChat.item._id);
                 if(result==false) return;
 
