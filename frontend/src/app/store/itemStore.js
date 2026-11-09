@@ -217,7 +217,7 @@ export const useItemStore = create((set,get)=>({
             if(!res.ok) {
                 throw new Error(response.message);
             }
-            toast.success("Item reserved successfully");
+            toast.success(response.message);
             return true;
         }
 
@@ -228,6 +228,37 @@ export const useItemStore = create((set,get)=>({
         finally {
             set({isReserving : false})
         }
+    },
+
+    isundoReserving : false,
+    undoReserve : async function (ItemId) {
+        set({isundoReserving : true});
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/items/undoReserve/${ItemId}`,
+                {
+                    method : "PATCH",
+                    headers : {'Content-Type': 'application/json'},
+                    credentials : "include",
+                    cache : "no-store",
+                }
+            )
+            const response = await res.json();
+            if(!res.ok) {
+                throw new Error(response.message);
+            }
+            toast.success(response.message);
+            return true;
+        }
+
+        catch(error) {
+            toast.error(error.message);
+            return false;
+        }
+        finally {
+            set({isundoReserving : false})
+        }
     }
+
+
 
 }));

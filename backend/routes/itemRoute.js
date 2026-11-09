@@ -21,6 +21,6 @@ itemRouter.delete('/delete/:id',protectRoute,isVerified,deleteItem);
 itemRouter.post('/reserve/:id',protectRoute,isVerified,reserveItem);
 
 // undo reserve item api 
-itemRouter.post('/undoReserve/:id',protectRoute,isVerified,undoReserve);
+itemRouter.patch('/undoReserve/:id',protectRoute,isVerified,undoReserve);
 
 export default itemRouter;

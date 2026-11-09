@@ -114,7 +114,7 @@ export default function SideBar() {
                     </div>)
                   }
                 </span>
-                <span className="text-sm text-start">{chat.item.title}</span>
+                <span className="text-sm text-start">{chat.item?.title || "Listing unavailable"}</span>
               </div>
 
             </div>

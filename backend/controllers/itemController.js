@@ -7,6 +7,7 @@ import Purchase from "../models/Purchase.js";
 import { randomInt } from "node:crypto";
 import { sendReservationCodeEmail } from "../lib/emailService.js";
 import bcrypt from "bcryptjs"
+import Message from "../models/MessageModel.js";
 
 async function postItem(req,res) {
     const {title,category,brand,description,price,pickupLocation,photos} = req.body
@@ -268,7 +269,7 @@ async function reserveItem(req,res) {
         const salt = await bcrypt.genSalt(10);
         const hashedCode = await bcrypt.hash(code,salt);
 
-        // generate the purchase item : 
+        // generate the purchase item and save to db: 
         const newPurchase =  new Purchase({
             item : reservedItem._id,
             buyer : authUserId,
@@ -296,16 +297,23 @@ async function reserveItem(req,res) {
             throw saveError
         }
 
-        // code will be send as email to the buyer : 
-        try {
-            const buyer = await User.findOne({_id : authUserId}).select({email : 1})
-            if(!buyer) throw new Error("Could not find the buyer's email address.")
+        
+        // const io = req.app.get("io");
+        // send a notification to the seller if he is online and not in the chat section 
+        // const sockets =  await io.in(existingChat._id.toString()).fetchSockets();
 
-            // if email sending fails , then the emailError catch runs : 
-            await sendReservationCodeEmail(buyer.email,code,existingItem.title)
+        // save the message to the db as well 
+        try {
+            const newChatMessage = new Message({
+               chat: existingChat._id,
+               sender: authUserId,
+               receiver: reservedItem.seller,
+               text: "Item successfully reserved",
+            });
+            await newChatMessage.save()
         }
-        catch(emailError) {
-            // Marks the purchase cancel if email fails: 
+        catch(error) {
+            // Marks the purchase cancel if message to sender fails: 
             await Purchase.findOneAndUpdate(
                 {_id : newPurchase._id,status : "reserved"}, 
                 {$set : {status :"cancelled"}},
@@ -320,12 +328,30 @@ async function reserveItem(req,res) {
                 },
                 { $set: { status: "available" } },
             )
-            throw emailError
+            throw error
         }
 
-        // a success message will be send to the frontend
+        // Email delivery is separate from reservation success. If it fails,
+        // keep the item and purchase reserved so the buyer can retry later.
+        let codeEmailSent = true;
+        try {
+            const buyer = await User.findById(authUserId).select("email");
+            if (!buyer?.email) {
+                throw new Error("Could not find the buyer's email address.");
+            }
+
+            await sendReservationCodeEmail(buyer.email, code, reservedItem.title);
+        }
+        catch(emailError) {
+            codeEmailSent = false;
+            console.error(`Reservation code email failed: ${emailError.message}`);
+        }
+
+        // The reservation succeeded even if email delivery needs to be retried.
         return res.status(201).json({
-            message : "Item reserved successfully.",
+            message : codeEmailSent
+                ? "Item reserved successfully."
+                : "Item reserved successfully, but the verification code email could not be sent. Please try resending the code.",
             itemName : reservedItem.title,
             pickupLocation : reservedItem.pickupLocation
         })
@@ -338,6 +364,73 @@ async function reserveItem(req,res) {
     }
 }
 
-async function undoReserve(req,res) {}
+async function undoReserve(req,res) {
+    const itemId = req.params.id;
+    const authUserId = req.AuthUser.userId;
+
+    if (!isValidObjectId(itemId)) {
+        return res.status(400).json({ message: "Invalid objectId" });
+    }
+
+    let session;
+    try {
+        session = await Purchase.startSession();
+
+        await session.withTransaction(async () => {
+            // Cancel only this buyer's active reservation.
+            const cancelledPurchase = await Purchase.findOneAndUpdate(
+                { item: itemId, buyer: authUserId, status: "reserved" },
+                { $set: { status: "cancelled" } },
+                { returnDocument: "after", session }
+            );
+
+            if (!cancelledPurchase) {
+                const error = new Error("No active reservation found for this item.");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            // Release the listing as part of the same transaction.
+            const availableItem = await Item.findOneAndUpdate(
+                {
+                    _id: itemId,
+                    seller: cancelledPurchase.seller,
+                    status: "reserved",
+                },
+                { $set: { status: "available" } },
+                { returnDocument: "after", session }
+            );
+
+            if (!availableItem) {
+                // The item may already be available while its purchase still says
+                // reserved. Treat that as an already-completed release.
+                const currentItem = await Item.findOne({
+                    _id: itemId,
+                    seller: cancelledPurchase.seller,
+                }).select("status").session(session);
+
+                if (!currentItem || currentItem.status !== "available") {
+                    const error = new Error("This reservation can no longer be cancelled because the item is not available.");
+                    error.statusCode = 409;
+                    throw error;
+                }
+            }
+        });
+
+        return res.status(200).json({
+            message: "Reservation cancelled successfully.",
+            itemId,
+            itemStatus: "available",
+            purchaseStatus: "cancelled",
+        });
+    }
+    catch(error) {
+        console.log(`Error in undoReserve controller : ${error.message}`);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+    finally {
+        if (session) await session.endSession();
+    }
+}
 
 export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem,undoReserve}

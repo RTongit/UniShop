@@ -1,14 +1,14 @@
 "use client";
 
-import { Cross, Image as ImageIcon, LoaderCircle, Paperclip, Send, X } from "lucide-react";
+import { Cross, Image as ImageIcon, Paperclip, Send, X } from "lucide-react";
 import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/authStore";
 import Message from "./Message";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import Spinner from "./Spinner";
 import { useRouter } from "next/navigation";
 import { useItemStore } from "../store/itemStore";
+import ButtonSpinner from "./ButtonSpinner";
 
 // dummy data :
 const MessageColor = {
@@ -144,13 +144,14 @@ const MessageContainer = ({ chatId }) => {
     unsubscribeFromMessage,
   } = useChatStore();
   const { authUser, socket } = useAuthStore();
-  const {reserveItem,isReserving} = useItemStore()
+  const {reserveItem,isReserving,undoReserve,isundoReserving} = useItemStore()
 
   const [text, setText] = useState("");
   const [image, setImage] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const router = useRouter()
+  const [confirmationAction, setConfirmationAction] = useState(null);
 
   const isInitialLoad = useRef(true);
 
@@ -234,6 +235,24 @@ const MessageContainer = ({ chatId }) => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  async function confirmReservationAction() {
+    if (!selectedChat?.item?._id) return;
+
+    const result = confirmationAction === "reserve"
+      ? await reserveItem(selectedChat.item._id)
+      : await undoReserve(selectedChat.item._id);
+    if (!result) return;
+
+    setSelectedChat({
+      ...selectedChat,
+      item: {
+        ...selectedChat.item,
+        status: confirmationAction === "reserve" ? "reserved" : "available",
+      },
+    });
+    setConfirmationAction(null);
+  }
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
       
@@ -272,15 +291,20 @@ const MessageContainer = ({ chatId }) => {
           </div>
         </div>
 
-        {/* Cross or return button */}
-        <button 
-          onClick={()=>{
-            if(setSelectedChat) setSelectedChat(null)
-            router.replace("/chat")
-          }}
-        >
-          <X/>
-        </button>
+        <div className="flex shrink-0 items-center">
+          {/* Close the selected chat and return to the chat list. */}
+          <button
+            type="button"
+            aria-label="Close chat"
+            onClick={() => {
+              if (setSelectedChat) setSelectedChat(null);
+              router.replace("/chat");
+            }}
+            className="grid size-8 place-items-center rounded-md text-slate-700 transition hover:bg-slate-100"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
         {/* Actions todo need to implement three dots feature later */}
 
@@ -328,25 +352,26 @@ const MessageContainer = ({ chatId }) => {
             {/* Only an available item be reserved*/}
             {(selectedChat.item?.status === "available") ? 
               (<button type="button" 
-                className="whitespace-nowrap rounded-md bg-black px-2 py-1.5 text-[10px] font-semibold text-white disabled:bg-gray-400 disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
+                className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-black px-2 py-1.5 text-[10px] font-semibold text-white disabled:bg-gray-400 disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
                 disabled = {isReserving}
-                onClick={async ()=>{
-                const result = await reserveItem(selectedChat.item._id);
-                if(result==false) return;
-
-                // below code will only run if it is reserved in backend
-                if(result==true) {
-                  setSelectedChat(
-                    {...selectedChat,
-                      item : {...selectedChat.item,status : "reserved"}
-                    })
-                }
-              }}
+                onClick={() => setConfirmationAction("reserve")}
               >
-                {isReserving ? "Reserving..." : "Reserve"}
+                Reserve
               </button>)
               : 
-              (selectedChat.item?.status === "reserved") ? (<button type="button" className="whitespace-nowrap rounded-md bg-black px-2 py-1.5 text-[10px] font-semibold text-white sm:px-4 sm:py-2 sm:text-sm">Undo</button>) : null
+              (selectedChat.item?.status === "reserved") ? 
+              (
+                <button type="button" 
+                className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-black px-2 py-1.5 text-[10px] font-semibold text-white disabled:bg-gray-400 disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
+                disabled={isundoReserving}
+                onClick={() => setConfirmationAction("undo")}
+                >
+                  {isundoReserving ? <><ButtonSpinner /> Cancelling...</> : "Undo"}
+                </button>
+
+              ) 
+              : 
+              null
             }
             
             {(selectedChat.item?.status === "reserved") ? 
@@ -446,7 +471,7 @@ const MessageContainer = ({ chatId }) => {
             className="flex items-center px-4 text-gray-400"
             disabled
           >
-            <LoaderCircle className="size-5  md:size-6 animate-spin" />
+            <ButtonSpinner className="size-5 md:size-6" />
           </button>
         ) : (
           <button
@@ -458,6 +483,65 @@ const MessageContainer = ({ chatId }) => {
           </button>
         )}
       </form>
+
+      {confirmationAction && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4"
+          onClick={(event) => {
+            if (event.target === event.currentTarget && !isReserving && !isundoReserving) {
+              setConfirmationAction(null);
+            }
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reservation-confirmation-title"
+            className="relative w-full max-w-lg rounded-2xl bg-[#f8f7f5] px-6 pb-6 pt-12 shadow-2xl sm:px-10 sm:pb-9 sm:pt-14"
+          >
+            <button
+              type="button"
+              aria-label="Close confirmation"
+              disabled={isReserving || isundoReserving}
+              onClick={() => setConfirmationAction(null)}
+              className="absolute right-4 top-4 grid size-8 place-items-center rounded-full bg-white text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
+            >
+              <X size={17} />
+            </button>
+            <h2 id="reservation-confirmation-title" className="text-center text-xl font-bold text-slate-900 sm:text-2xl">
+              Are you sure?
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-center text-sm leading-5 text-slate-600 sm:text-base">
+              {confirmationAction === "reserve"
+                ? `Reserve “${selectedChat.item?.title || "this item"}”${selectedChat.item?.price != null ? ` for ₹${Number(selectedChat.item.price).toLocaleString("en-IN")}` : ""}? You’ll receive a verification code by email. Share it with the seller only after collecting the item.`
+                : `Cancel your reservation for “${selectedChat.item?.title || "this item"}”? It will become available to other students.`}
+            </p>
+            <div className="mt-7 flex gap-3 sm:mt-8">
+              <button
+                type="button"
+                disabled={isReserving || isundoReserving}
+                onClick={() => setConfirmationAction(null)}
+                className="flex-1 rounded-lg border border-slate-800 bg-transparent px-3 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white disabled:opacity-50 sm:px-5"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isReserving || isundoReserving}
+                onClick={confirmReservationAction}
+                className="inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-black px-3 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:px-5"
+              >
+                {isReserving || isundoReserving ? (
+                  <>
+                    <ButtonSpinner />
+                    {confirmationAction === "reserve" ? "Reserving…" : "Cancelling…"}
+                  </>
+                ) : confirmationAction === "reserve" ? "Reserve item" : "Undo reservation"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
     </div>
   );
