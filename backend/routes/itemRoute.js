@@ -15,6 +15,8 @@ itemRouter.get('/myItems',protectRoute,isVerified,getMyItems)
 
 // edit api 
 itemRouter.patch('/item/:id/edit',protectRoute,isVerified,editItem);
+
+// delete api
 itemRouter.delete('/delete/:id',protectRoute,isVerified,deleteItem);
 
 // reserve item api : 

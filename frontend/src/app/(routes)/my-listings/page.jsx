@@ -1,5 +1,6 @@
 "use client";
 import Sold from "@/app/components/Sold";
+import MarkSoldCodeModal from "@/app/components/MarkSoldCodeModal";
 import { useAuthStore } from "@/app/store/authStore";
 import {
   ArrowDown,
@@ -38,7 +39,7 @@ function handleUnverifiedAccess() {
 
 export default function ListingPage() {
   const { authUser } = useAuthStore();
-  const { myItems, isMyItemsLoading, getMyItems, deleteItem, editItem } =
+  const { myItems, isMyItemsLoading, getMyItems, deleteItem } =
     useItemStore();
   const router = useRouter();
 
@@ -47,6 +48,7 @@ export default function ListingPage() {
   const [edit, setEdit] = useState(0);
   const [sortVal, setSortVal] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [itemToMarkSold, setItemToMarkSold] = useState(null);
 
   useEffect(() => {
     if(!authUser) {router.replace("/login"); return;}
@@ -300,34 +302,29 @@ export default function ListingPage() {
                 >
                   <Edit2 className="size-5"></Edit2>
                 </Link>
-                {/* Edit button */}
+
+                {item.status === "reserved" ? 
+                (
+                // Edit button
                 <button
                   className="hover:cursor-pointer"
-                  onClick={(e) => {
-                    async function fetchItems() {
-                      const response = await editItem(item._id, {
-                        status: item.status === "sold" ? "available" : "sold",
-                      });
-                      if (response) setItems(response);
-                    }
-                    fetchItems();
+                  onClick={() => {
+                    setItemToMarkSold(item);
                   }}
                 >
-                  {item.status === "sold" ? (
                     <div className=" flex flex-row gap-x-2  p-2 text-black rounded-xl">
-                      <RotateCcw /> <span>Restock</span>
+                      <CircleCheckBig /> <span>Mark Sold</span>
                     </div>
-                  ) : item.status === "reserved" ? (
-                    <div className="flex flex-row gap-x-2 p-2 text-amber-800 rounded-xl">
-                      <span>Reserved</span>
-                    </div>
-                  ) : (
-                    <div className=" flex flex-row gap-x-2  p-2 text-black  rounded-xl">
-                      <CircleCheckBig />
-                      <span>Mark Sold</span>
-                    </div>
-                  )}
+
+                    {/* This is the Unreseve button */}
+                    {/* <div className=" flex flex-row gap-x-2  p-2 text-black rounded-xl">
+                      <RotateCcw /> <span>Unreserve</span>
+                    </div> */}
+
                 </button>
+
+                ) : null}
+
                 <button
                   className="hover:cursor-pointer  flex justify-center items-center rounded-full  text-bkack p-2"
                   onClick={() => {
@@ -347,6 +344,8 @@ export default function ListingPage() {
           ))}
         </div>
       </div>
+
+      <MarkSoldCodeModal item={itemToMarkSold} onClose={() => setItemToMarkSold(null)} />
     </div>
   );
 }

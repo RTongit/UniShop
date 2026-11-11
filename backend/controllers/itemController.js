@@ -297,23 +297,18 @@ async function reserveItem(req,res) {
             throw saveError
         }
 
-        
-        // const io = req.app.get("io");
-        // send a notification to the seller if he is online and not in the chat section 
-        // const sockets =  await io.in(existingChat._id.toString()).fetchSockets();
-
-        // save the message to the db as well 
+        // Save the reservation message in the existing chat.
+        const newChatMessage = new Message({
+            chat: existingChat._id,
+            sender: authUserId,
+            receiver: reservedItem.seller,
+            text: "Item successfully reserved",
+        });
         try {
-            const newChatMessage = new Message({
-               chat: existingChat._id,
-               sender: authUserId,
-               receiver: reservedItem.seller,
-               text: "Item successfully reserved",
-            });
-            await newChatMessage.save()
+            await newChatMessage.save();
         }
         catch(error) {
-            // Marks the purchase cancel if message to sender fails: 
+            // Roll back if the reservation message could not be saved.
             await Purchase.findOneAndUpdate(
                 {_id : newPurchase._id,status : "reserved"}, 
                 {$set : {status :"cancelled"}},
@@ -329,6 +324,58 @@ async function reserveItem(req,res) {
                 { $set: { status: "available" } },
             )
             throw error
+        }
+
+        // Realtime delivery and unread notifications are best-effort; they
+        // must not undo a reservation/message already saved to the database.
+        const io = req.app.get("io");
+        if (io) {
+            try {
+                await newChatMessage.populate([
+                    { path: "receiver", select: "name profilePic" },
+                    { path: "sender", select: "name profilePic" },
+                ]);
+
+                const chatRoomId = existingChat._id.toString();
+                const sellerId = reservedItem.seller.toString();
+                io.to(chatRoomId).emit("newMessage", newChatMessage);
+
+                const chatSockets = await io.in(chatRoomId).fetchSockets();
+                const sellerIsInChat = chatSockets.some(
+                    (socket) => socket.userId?.toString() === sellerId
+                );
+
+                if (!sellerIsInChat) {
+                    // Increment the global unread count only when this chat
+                    // transitions from read to unread.
+                    const updatedChat = await Chat.findOneAndUpdate(
+                        { _id: existingChat._id, sellerHasUnreadMessage: false },
+                        { $set: { sellerHasUnreadMessage: true } },
+                        { returnDocument: "after" }
+                    );
+
+                    if (updatedChat) {
+                        const updatedUser = await User.findByIdAndUpdate(
+                            sellerId,
+                            { $inc: { unreadChatCount: 1 } },
+                            { returnDocument: "after" }
+                        ).select("unreadChatCount");
+
+                        if (updatedUser) {
+                            io.to(sellerId).emit("newGlobalNotification", {
+                                unreadChatCount: updatedUser.unreadChatCount,
+                            });
+                        }
+
+                        io.to(sellerId).emit("newChatNotification", {
+                            chat: updatedChat,
+                        });
+                    }
+                }
+            }
+            catch(notificationError) {
+                console.error(`Reservation notification failed: ${notificationError.message}`);
+            }
         }
 
         // Email delivery is separate from reservation success. If it fails,
@@ -373,6 +420,9 @@ async function undoReserve(req,res) {
     }
 
     let session;
+    let cancellationMessage;
+    let cancelledSellerId;
+    let cancellationChatId;
     try {
         session = await Purchase.startSession();
 
@@ -389,6 +439,7 @@ async function undoReserve(req,res) {
                 error.statusCode = 404;
                 throw error;
             }
+            cancelledSellerId = cancelledPurchase.seller;
 
             // Release the listing as part of the same transaction.
             const availableItem = await Item.findOneAndUpdate(
@@ -415,7 +466,77 @@ async function undoReserve(req,res) {
                     throw error;
                 }
             }
+
+            const existingChat = await Chat.findOne({
+                buyer: authUserId,
+                seller: cancelledPurchase.seller,
+                item: itemId,
+            }).session(session);
+
+            if (!existingChat) {
+                throw new Error("Chat for this reservation does not exist.");
+            }
+
+            // Save the cancellation message with the purchase and item changes.
+            cancellationChatId = existingChat._id;
+            cancellationMessage = new Message({
+                chat: existingChat._id,
+                sender: authUserId,
+                receiver: cancelledPurchase.seller,
+                text: "Reservation cancelled",
+            });
+            await cancellationMessage.save({ session });
         });
+
+        // Emit only after the transaction commits so clients aren't told about
+        // a cancellation that later rolls back.
+        const io = req.app.get("io");
+        if (io) {
+            try {
+                await cancellationMessage.populate([
+                    { path: "receiver", select: "name profilePic" },
+                    { path: "sender", select: "name profilePic" },
+                ]);
+
+                const chatRoomId = cancellationChatId.toString();
+                const sellerId = cancelledSellerId.toString();
+                io.to(chatRoomId).emit("newMessage", cancellationMessage);
+
+                const chatSockets = await io.in(chatRoomId).fetchSockets();
+                const sellerIsInChat = chatSockets.some(
+                    (socket) => socket.userId?.toString() === sellerId
+                );
+
+                if (!sellerIsInChat) {
+                    const updatedChat = await Chat.findOneAndUpdate(
+                        { _id: cancellationChatId, sellerHasUnreadMessage: false },
+                        { $set: { sellerHasUnreadMessage: true } },
+                        { returnDocument: "after" }
+                    );
+
+                    if (updatedChat) {
+                        const updatedUser = await User.findByIdAndUpdate(
+                            sellerId,
+                            { $inc: { unreadChatCount: 1 } },
+                            { returnDocument: "after" }
+                        ).select("unreadChatCount");
+
+                        if (updatedUser) {
+                            io.to(sellerId).emit("newGlobalNotification", {
+                                unreadChatCount: updatedUser.unreadChatCount,
+                            });
+                        }
+
+                        io.to(sellerId).emit("newChatNotification", {
+                            chat: updatedChat,
+                        });
+                    }
+                }
+            }
+            catch(notificationError) {
+                console.error(`Cancellation notification failed: ${notificationError.message}`);
+            }
+        }
 
         return res.status(200).json({
             message: "Reservation cancelled successfully.",

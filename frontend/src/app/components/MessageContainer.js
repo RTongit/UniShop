@@ -1,6 +1,6 @@
 "use client";
 
-import { Cross, Image as ImageIcon, Paperclip, Send, X } from "lucide-react";
+import { Image as ImageIcon, Paperclip, Send, X } from "lucide-react";
 import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/authStore";
 import Message from "./Message";
@@ -177,7 +177,7 @@ const MessageContainer = ({ chatId }) => {
     return () => {
       unsubscribeFromMessage();
     };
-  }, [subscribeToMessage, unsubscribeFromMessage]);
+  }, [socket, subscribeToMessage, unsubscribeFromMessage]);
 
   useEffect(() => {
     if (!socket) return;
