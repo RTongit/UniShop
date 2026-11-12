@@ -1,5 +1,5 @@
 import express from "express"
-import { deleteItem, searchItems, postItem, getSingleItem, getMyItems, editItem, reserveItem, undoReserve } from "../controllers/itemController.js";
+import { deleteItem, searchItems, postItem, getSingleItem, getMyItems, editItem, reserveItem, undoReserve, markItemSold } from "../controllers/itemController.js";
 import protectRoute from "../middleware/protectRoute.js";
 import isVerified from "../middleware/isVerified.js";
 
@@ -24,5 +24,8 @@ itemRouter.post('/reserve/:id',protectRoute,isVerified,reserveItem);
 
 // undo reserve item api 
 itemRouter.patch('/undoReserve/:id',protectRoute,isVerified,undoReserve);
+
+// markItemSold api
+itemRouter.patch("/:itemId/mark-sold", protectRoute, isVerified, markItemSold);
 
 export default itemRouter;

@@ -554,4 +554,69 @@ async function undoReserve(req,res) {
     }
 }
 
-export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem,undoReserve}
+async function markItemSold(req,res) {
+    const itemId = req.params.itemId;
+    const authUserId = req.AuthUser.userId;
+    const {code} = req.body
+
+    if (!isValidObjectId(itemId)) {
+        return res.status(400).json({ message: "Invalid objectId" });
+    }
+
+    try {
+       
+        // check the code : 
+
+        // update the item : 
+        const itemSold = await Item.findOneAndUpdate(
+            {_id : itemId, seller : authUserId, status : "reserved"},
+            {$set : {status : "sold"}},
+            {returnDocument : "after"}
+        )
+        if(!itemSold) return res.status(409).json({message: "This item is not reserved or you do not own it."});
+
+        // update the purchase :
+        let purchaseCompleted
+        try {
+            purchaseCompleted =  await Purchase.findOneAndUpdate(
+                {item: itemId, status : "reserved", seller : authUserId},
+                {$set : {status : "completed",completedAt: new Date() }},
+                {returnDocument : "after"}
+            )
+        }
+        catch(error) {
+
+            // revert back the changes made to the item : 
+            await Item.findOneAndUpdate(
+                {_id : itemId, seller : authUserId, status : "sold"},
+                {$set : {status : "reserved"}},
+            )
+            throw error
+        } 
+
+        // revert back the changes made to the item : 
+        if(!purchaseCompleted) {
+            await Item.findOneAndUpdate(
+                {_id : itemId, seller : authUserId, status : "sold"},
+                {$set : {status : "reserved"}},
+            )
+            return res.status(409).json({
+              message: "No active reservation was found for this item.",
+            });
+        }
+
+        return res.status(200).json({
+           message: "Item marked as sold successfully.",
+           itemStatus: itemSold.status,
+           purchaseStatus: purchaseCompleted.status,
+        });
+
+    }
+    catch(error) {
+        console.log(`Error in markItemSold controller : ${error.message}`);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+}
+
+export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem,undoReserve,markItemSold}
