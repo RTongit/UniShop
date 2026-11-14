@@ -40,7 +40,7 @@ export default function ReleaseReservationModal({ item, onClose, onReleased }) {
           <X size={18} />
         </button>
 
-        <h2 id="release-reservation-title" className="font-serif text-2xl font-medium tracking-tight text-[#18352c]">
+        <h2 id="release-reservation-title" className="pr-12 font-serif text-2xl font-medium tracking-tight text-[#18352c]">
           Release this reservation?
         </h2>
         <p className="mt-2 text-sm leading-6 text-[#687168]">
