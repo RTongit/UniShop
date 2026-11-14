@@ -324,9 +324,11 @@ export default function ListingPage() {
               {/* Divider */}
               {/* <div className="border-t border-gray-700"></div> */}
 
-              <div className="mx-2 my-2 flex h-12 flex-row items-center justify-center gap-x-1 rounded-md border border-stone-200 p-1.5">
+              <div className="mx-2 my-2 flex min-h-12 flex-row items-center justify-center gap-x-1 rounded-md border border-stone-200 p-1.5 md:h-12">
                 <Link
                   href={`/my-listings/edit/${item._id}`}
+                  aria-label="Edit listing"
+                  title="Edit listing"
                   className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg p-2 text-black transition hover:bg-stone-100"
                 >
                   <Edit2 className="size-5"></Edit2>
@@ -338,10 +340,11 @@ export default function ListingPage() {
                       type="button"
                       aria-label="Mark item as sold"
                       title="Mark item as sold"
-                      className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg text-black transition hover:bg-stone-100"
+                      className="flex min-h-10 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:flex-none md:flex-row md:p-2"
                       onClick={() => setItemToMarkSold(item)}
                     >
                       <CircleCheckBig className="size-5" />
+                      <span className="text-[10px] font-medium leading-none md:hidden">Mark sold</span>
                     </button>
                     
                     {/* Release button */}
@@ -349,16 +352,20 @@ export default function ListingPage() {
                       type="button"
                       aria-label="Release reservation"
                       title="Release reservation"
-                      className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg text-black transition hover:bg-stone-100"
+                      className="flex min-h-10 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:flex-none md:flex-row md:p-2"
                       onClick={() => setItemToRelease(item)}
                     >
                       <RotateCcw className="size-5" />
+                      <span className="text-[10px] font-medium leading-none md:hidden">Release</span>
                     </button>
                   </>
                 )}
 
                 {item.status !== "reserved" && (
                   <button
+                    type="button"
+                    aria-label="Delete listing"
+                    title="Delete listing"
                     className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg p-2 text-black transition hover:bg-stone-100"
                     onClick={() => {
                       async function fetchDeleteItem() {
