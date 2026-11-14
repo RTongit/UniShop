@@ -297,7 +297,7 @@ const MessageContainer = ({ chatId }) => {
               className="size-10 rounded-full object-cover sm:size-11 md:size-12"
             />
             {otherUserId && onlineUsers.includes(otherUserId) && (
-              <span title="Online" className="absolute bottom-2 right-0.5 size-3 rounded-full bg-green-600" />
+              <span title="Online" className="absolute bottom-0 right-0 size-3.5 rounded-full border-2 border-white bg-green-600 shadow-sm" />
             )}
           </div>
 
