@@ -329,7 +329,7 @@ export default function ListingPage() {
                   href={`/my-listings/edit/${item._id}`}
                   aria-label="Edit listing"
                   title="Edit listing"
-                  className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg p-2 text-black transition hover:bg-stone-100"
+                  className="flex min-h-10 w-12 shrink-0 cursor-pointer items-center justify-center rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:p-2"
                 >
                   <Edit2 className="size-5"></Edit2>
                 </Link>
@@ -340,7 +340,7 @@ export default function ListingPage() {
                       type="button"
                       aria-label="Mark item as sold"
                       title="Mark item as sold"
-                      className="flex min-h-10 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:flex-none md:flex-row md:p-2"
+                      className="flex min-h-10 w-[76px] shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:flex-row md:p-2"
                       onClick={() => setItemToMarkSold(item)}
                     >
                       <CircleCheckBig className="size-5" />
@@ -352,7 +352,7 @@ export default function ListingPage() {
                       type="button"
                       aria-label="Release reservation"
                       title="Release reservation"
-                      className="flex min-h-10 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:flex-none md:flex-row md:p-2"
+                      className="flex min-h-10 w-[68px] shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:flex-row md:p-2"
                       onClick={() => setItemToRelease(item)}
                     >
                       <RotateCcw className="size-5" />

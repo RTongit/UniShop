@@ -1,7 +1,7 @@
 "use client";
 
 import formatPrice from "@/app/constant/formatPrice";
-import { RotateCcw, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useItemStore } from "../store/itemStore";
 
 export default function ReleaseReservationModal({ item, onClose, onReleased }) {
@@ -28,7 +28,7 @@ export default function ReleaseReservationModal({ item, onClose, onReleased }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="release-reservation-title"
-        className="relative w-full max-w-md rounded-[1.75rem] border border-[#e7e3d8] bg-[#faf9f4] p-6 shadow-[0_24px_80px_rgba(24,42,34,0.2)] sm:p-8"
+        className="relative w-full max-w-md rounded-lg border border-[#e7e3d8] bg-[#faf9f4] p-6 shadow-[0_24px_80px_rgba(24,42,34,0.2)] sm:p-8"
       >
         <button
           type="button"
@@ -40,9 +40,6 @@ export default function ReleaseReservationModal({ item, onClose, onReleased }) {
           <X size={18} />
         </button>
 
-        <div className="mb-4 grid size-11 place-items-center rounded-full bg-[#eeede5] text-[#18352c]">
-          <RotateCcw size={20} />
-        </div>
         <h2 id="release-reservation-title" className="font-serif text-2xl font-medium tracking-tight text-[#18352c]">
           Release this reservation?
         </h2>
@@ -55,20 +52,12 @@ export default function ReleaseReservationModal({ item, onClose, onReleased }) {
           <p className="mt-1 text-sm text-[#788176]">{formatPrice(item.price)}</p>
         </div>
 
-        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            disabled={isReleasingReservation}
-            onClick={onClose}
-            className="h-11 rounded-xl border border-[#d9d8cb] bg-transparent px-5 text-sm font-semibold text-[#344239] transition hover:bg-[#eeede5] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Keep reservation
-          </button>
+        <div className="mt-6">
           <button
             type="button"
             disabled={isReleasingReservation}
             onClick={handleRelease}
-            className="h-11 rounded-xl bg-black px-5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 w-full rounded-md bg-black px-5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isReleasingReservation ? "Releasing…" : "Release reservation"}
           </button>
