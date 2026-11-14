@@ -33,12 +33,12 @@ const PurchaseSchema = new mongoose.Schema(
     verificationCodeHash: {
       type: String,
       required: true,
-      select: false,
     },
     expiresAt: {
       type: Date,
       required: true,
     },
+    // TODO: Add a resend cooldown timestamp to limit repeated reservation-code emails.
     completedAt: {
       type: Date,
       default: null,

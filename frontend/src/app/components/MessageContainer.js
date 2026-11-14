@@ -143,8 +143,16 @@ const MessageContainer = ({ chatId }) => {
     subscribeToMessage,
     unsubscribeFromMessage,
   } = useChatStore();
+
   const { authUser, socket } = useAuthStore();
-  const {reserveItem,isReserving,undoReserve,isundoReserving} = useItemStore()
+  const {
+    reserveItem,
+    isReserving,
+    undoReserve,
+    isundoReserving,
+    resendReservationCode,
+    isResendingReservationCode,
+  } = useItemStore()
 
   const [text, setText] = useState("");
   const [image, setImage] = useState("");
@@ -157,6 +165,7 @@ const MessageContainer = ({ chatId }) => {
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  
   const otherUserId = selectedChat
     ? (authUser.userId === selectedChat.buyer._id.toString() ? selectedChat.seller._id : selectedChat.buyer._id).toString()
     : null;
@@ -178,6 +187,22 @@ const MessageContainer = ({ chatId }) => {
       unsubscribeFromMessage();
     };
   }, [socket, subscribeToMessage, unsubscribeFromMessage]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleReservationReleased = ({ itemId, itemStatus }) => {
+      if (selectedChat?.item?._id?.toString() !== itemId?.toString()) return;
+
+      setSelectedChat({
+        ...selectedChat,
+        item: { ...selectedChat.item, status: itemStatus },
+      });
+    };
+
+    socket.on("reservationReleased", handleReservationReleased);
+    return () => socket.off("reservationReleased", handleReservationReleased);
+  }, [socket, selectedChat, setSelectedChat]);
 
   useEffect(() => {
     if (!socket) return;
@@ -375,7 +400,14 @@ const MessageContainer = ({ chatId }) => {
             }
             
             {(selectedChat.item?.status === "reserved") ? 
-             (<button type="button" className="whitespace-nowrap rounded-md border border-slate-300 bg-white px-2 py-1.5 text-[10px] font-semibold text-slate-800 sm:px-4 sm:py-2 sm:text-sm">Resend code</button>) 
+             (<button
+                type="button"
+                className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-slate-300 bg-white px-2 py-1.5 text-[10px] font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
+                disabled={isResendingReservationCode}
+                onClick={() => resendReservationCode(selectedChat.item._id)}
+              >
+                {isResendingReservationCode ? <><ButtonSpinner /> Sending...</> : "Resend code"}
+              </button>) 
              :
              null
             }

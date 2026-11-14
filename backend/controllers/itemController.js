@@ -221,11 +221,13 @@ async function deleteItem(req,res) {
 
         // Only the seller who owns this active item can soft-delete it.
         const item = await Item.findOneAndUpdate(
-            {_id : itemId, seller : authUserId, isDeleted : false},
+            {_id : itemId, seller : authUserId, isDeleted : false, status : {$in : ['available','sold']}},
             {$set : {isDeleted : true}},
             {returnDocument : "after"}
         );
-        if(!item) return res.status(404).json({message : "Cannot delete! Item does not exist"});
+        if (!item) {
+            return res.status(404).json({message: "Item not found or currently reserved. Reserved items cannot be deleted.",});
+        }
 
         return res.status(200).json({message : "Item successfully deleted"});
     }
@@ -250,7 +252,7 @@ async function reserveItem(req,res) {
         const existingItem = await Item.findOne({_id : itemId,seller : {$ne : authUserId}, status : "available"})
         if(!existingItem) return res.status(409).json({message : "Item is no longer available."});
 
-        // Atomically claim the item. Only one concurrent request can succeed.
+        // Atomically claim the item. Only one concurrent request can succeed preventing race condition.
         const reservedItem = await Item.findOneAndUpdate(
             {
                 _id: itemId,
@@ -382,12 +384,22 @@ async function reserveItem(req,res) {
         // keep the item and purchase reserved so the buyer can retry later.
         let codeEmailSent = true;
         try {
-            const buyer = await User.findById(authUserId).select("email");
+            const [buyer, seller] = await Promise.all([
+                User.findById(authUserId).select("email"),
+                User.findById(reservedItem.seller).select("name"),
+            ]);
             if (!buyer?.email) {
                 throw new Error("Could not find the buyer's email address.");
             }
 
-            await sendReservationCodeEmail(buyer.email, code, reservedItem.title);
+            await sendReservationCodeEmail(
+                buyer.email,
+                code,
+                reservedItem.title,
+                reservedItem.pickupLocation,
+                reservedItem.price,
+                seller?.name || "UniShop seller",
+            );
         }
         catch(emailError) {
             codeEmailSent = false;
@@ -554,6 +566,162 @@ async function undoReserve(req,res) {
     }
 }
 
+async function releaseReservation(req, res) {
+    const itemId = req.params.id;
+    const sellerId = req.AuthUser.userId;
+
+    if (!isValidObjectId(itemId)) {
+        return res.status(400).json({ message: "Invalid objectId" });
+    }
+
+    let releasedPurchase;
+    let buyerNotified = false;
+
+    try {
+        // Claim the active reservation so only one release request can proceed.
+        releasedPurchase = await Purchase.findOneAndUpdate(
+            { item: itemId, seller: sellerId, status: "reserved" },
+            { $set: { status: "cancelled" } },
+            { returnDocument: "after" }
+        );
+
+        if (!releasedPurchase) {
+            return res.status(409).json({
+                message: "No active reservation was found for this item.",
+            });
+        }
+
+        // Reopen only this seller's item while it is still reserved.
+        const availableItem = await Item.findOneAndUpdate(
+            { _id: itemId, seller: sellerId, status: "reserved" },
+            { $set: { status: "available" } },
+            { returnDocument: "after" }
+        );
+
+        if (!availableItem) {
+            // If the item could not be released, restore the purchase state.
+            await Purchase.findOneAndUpdate(
+                { _id: releasedPurchase._id, status: "cancelled" },
+                { $set: { status: "reserved" } }
+            );
+
+            return res.status(409).json({
+                message: "The item is no longer reserved, so it could not be released.",
+            });
+        }
+
+        // The release is committed. A chat notification failure should not
+        // reverse the seller's successful release.
+        try {
+            const existingChat = await Chat.findOne({
+                buyer: releasedPurchase.buyer,
+                seller: sellerId,
+                item: itemId,
+            });
+
+            if (!existingChat) {
+                throw new Error("Chat for this reservation does not exist.");
+            }
+
+            // creating and saving the message 
+            const releaseMessage = new Message({
+                chat: existingChat._id,
+                sender: sellerId,
+                receiver: releasedPurchase.buyer,
+                text: "Seller released the reservation. The item is available again.",
+            });
+            await releaseMessage.save();
+            buyerNotified = true;
+
+            const io = req.app.get("io");
+            let buyerIsInChat = false;
+            // checks if the buyer is in chat or not 
+            if (io) {
+                try {
+                    const chatRoomId = existingChat._id.toString();
+                    const buyerRoomId = releasedPurchase.buyer.toString();
+                    const chatSockets = await io.in(chatRoomId).fetchSockets();
+                    for (const socket of chatSockets) {
+                        if (socket.userId?.toString() === buyerRoomId) {
+                            buyerIsInChat = true;
+                            break;
+                        }
+                    }
+                } catch (socketError) {
+                    console.error(`Could not check buyer chat presence: ${socketError.message}`);
+                }
+            }
+
+            // Keep unread counts correct even if Socket.IO is temporarily unavailable.
+            // if buyer is not in chat , then buyerHasUnreadMessage and unreadChat count updates
+            if (!buyerIsInChat) {
+                const updatedChat = await Chat.findOneAndUpdate(
+                    { _id: existingChat._id, buyerHasUnreadMessage: false },
+                    { $set: { buyerHasUnreadMessage: true } },
+                    { returnDocument: "after" }
+                );
+
+                if (updatedChat) {
+                    const buyerRoomId = releasedPurchase.buyer.toString();
+                    const updatedUser = await User.findByIdAndUpdate(
+                        buyerRoomId,
+                        { $inc: { unreadChatCount: 1 } },
+                        { returnDocument: "after" }
+                    ).select("unreadChatCount");
+
+                    if (io && updatedUser) {
+                        io.to(buyerRoomId).emit("newGlobalNotification", {
+                            unreadChatCount: updatedUser.unreadChatCount,
+                        });
+                    }
+
+                    if (io) io.to(buyerRoomId).emit("newChatNotification", { chat: updatedChat });
+                }
+            }
+            
+            // If Socket.IO is available, send the saved release message and updated item status
+            // to everyone currently connected to this chat room.
+            if (io) {
+                try {
+                    await releaseMessage.populate([
+                        { path: "receiver", select: "name profilePic" },
+                        { path: "sender", select: "name profilePic" },
+                    ]);
+                    const chatRoomId = existingChat._id.toString();
+                    io.to(chatRoomId).emit("newMessage", releaseMessage);
+                    io.to(chatRoomId).emit("reservationReleased", { itemId, itemStatus: "available" });
+                } 
+
+                catch (socketError) {
+                    console.error(`Release realtime notification failed: ${socketError.message}`);
+                }
+            }
+
+        } 
+        
+        catch (notificationError) {
+            console.error(`Release chat notification failed: ${notificationError.message}`);
+        }
+
+        return res.status(200).json({
+            message: buyerNotified
+                ? "Reservation released. The item is available again and the buyer was notified in chat."
+                : "Reservation released and the item is available again, but the buyer could not be notified in chat.",
+            itemId,
+            itemStatus: "available",
+            purchaseStatus: "cancelled",
+            buyerNotified,
+        });
+    } 
+
+    catch (error) {
+        console.error(`Error in releaseReservation controller: ${error.message}`);
+        return res.status(error.statusCode || 500).json({
+            message: error.statusCode ? error.message : "Internal Server Error",
+        });
+    }
+}
+
 async function markItemSold(req,res) {
     const itemId = req.params.itemId;
     const authUserId = req.AuthUser.userId;
@@ -566,6 +734,17 @@ async function markItemSold(req,res) {
     try {
        
         // check the code : 
+        if(!code) return res.status(400).json({message : "Invalid code"});
+
+        // Reject codes that aren't strings containing exactly six digits.
+        if (typeof code !== "string" || code.length !== 6 || !/^\d+$/.test(code)) {
+           return res.status(400).json({ message: "Enter a valid 6-digit code." });
+        }
+        const purchase = await Purchase.findOne({item: itemId, status : "reserved", seller : authUserId})
+        if(!purchase) return res.status(404).json({message : "No active reservation found for this item"})
+        
+        const isMatched = await bcrypt.compare(code,purchase.verificationCodeHash);
+        if(!isMatched) return res.status(400).json({message : "Invalid code"});
 
         // update the item : 
         const itemSold = await Item.findOneAndUpdate(
@@ -619,4 +798,100 @@ async function markItemSold(req,res) {
 
 }
 
-export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem,undoReserve,markItemSold}
+async function resendReservationCode(req,res) {
+    const itemId = req.params.itemId;
+    const authUserId = req.AuthUser.userId;
+
+    if (!isValidObjectId(itemId)) {
+        return res.status(400).json({ message: "Invalid objectId" });
+    }
+
+    try {
+        // Only the buyer who owns the active reservation can request a new code.
+        const purchase = await Purchase.findOne({
+            item: itemId,
+            buyer: authUserId,
+            status: "reserved",
+        });
+
+        if (!purchase) {
+            return res.status(404).json({
+                message: "No active reservation found for this item.",
+            });
+        }
+
+        const [item, buyer, seller] = await Promise.all([
+            Item.findOne({ _id: itemId, status: "reserved" }).select("title price pickupLocation"),
+            User.findById(authUserId).select("email"),
+            User.findById(purchase.seller).select("name"),
+        ]);
+
+        if (!item) {
+            return res.status(409).json({
+                message: "This item is no longer reserved.",
+            });
+        }
+
+        if (!buyer?.email) {
+            return res.status(400).json({
+                message: "A valid email address is not available for your account.",
+            });
+        }
+
+        // Store only the hash. A resend creates a new code and invalidates the previous one.
+        const code = randomInt(100000, 1_000_000).toString();
+        const verificationCodeHash = await bcrypt.hash(code, 10);
+
+        const updatedPurchase = await Purchase.findOneAndUpdate(
+            { _id: purchase._id, buyer: authUserId, status: "reserved" },
+            { $set: { verificationCodeHash } },
+            { returnDocument: "after" }
+        );
+
+        if (!updatedPurchase) {
+            return res.status(409).json({
+                message: "The reservation is no longer active. Refresh and try again.",
+            });
+        }
+
+        try {
+            await sendReservationCodeEmail(
+                buyer.email,
+                code,
+                item.title,
+                purchase.pickupLocation || item.pickupLocation,
+                item.price,
+                seller?.name || "UniShop seller",
+            );
+        } catch (emailError) {
+            console.error(`Reservation code resend failed: ${emailError.message}`);
+            // Keep the previous code valid when the replacement email could not be sent.
+            try {
+                await Purchase.findOneAndUpdate(
+                    {
+                        _id: purchase._id,
+                        buyer: authUserId,
+                        status: "reserved",
+                        verificationCodeHash,
+                    },
+                    { $set: { verificationCodeHash: purchase.verificationCodeHash } }
+                );
+            } catch (rollbackError) {
+                console.error(`Reservation code rollback failed: ${rollbackError.message}`);
+            }
+
+            return res.status(502).json({
+                message: "The code email could not be sent. Please try resending it again.",
+            });
+        }
+
+        return res.status(200).json({
+            message: "A new reservation code has been sent to your email.",
+        });
+    } catch (error) {
+        console.error(`Error in resendReservationCode controller: ${error.message}`);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export {postItem,searchItems,deleteItem,getSingleItem,getMyItems,editItem,reserveItem,undoReserve,releaseReservation,markItemSold,resendReservationCode}

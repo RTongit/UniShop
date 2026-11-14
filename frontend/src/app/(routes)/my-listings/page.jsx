@@ -1,6 +1,8 @@
 "use client";
 import Sold from "@/app/components/Sold";
+import Reserved from "@/app/components/Reserved";
 import MarkSoldCodeModal from "@/app/components/MarkSoldCodeModal";
+import ReleaseReservationModal from "@/app/components/ReleaseReservationModal";
 import { useAuthStore } from "@/app/store/authStore";
 import {
   ArrowDown,
@@ -49,6 +51,7 @@ export default function ListingPage() {
   const [sortVal, setSortVal] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [itemToMarkSold, setItemToMarkSold] = useState(null);
+  const [itemToRelease, setItemToRelease] = useState(null);
 
   useEffect(() => {
     if(!authUser) {router.replace("/login"); return;}
@@ -104,6 +107,34 @@ export default function ListingPage() {
   function handleReset() {
     setItems((items) => myItems);
     setSelectedFilter([]);
+  }
+
+  function handleReservationReleased(itemId) {
+    setItems((currentItems) => {
+      if (selectedFilter.length > 0 && !selectedFilter.includes("Available")) {
+        return currentItems.filter((item) => item._id.toString() !== itemId.toString());
+      }
+
+      return currentItems.map((item) =>
+        item._id.toString() === itemId.toString()
+          ? { ...item, status: "available" }
+          : item
+      );
+    });
+  }
+
+  function handleItemMarkedSold(itemId) {
+    setItems((currentItems) => {
+      if (selectedFilter.length > 0 && !selectedFilter.includes("Sold")) {
+        return currentItems.filter((item) => item._id.toString() !== itemId.toString());
+      }
+      // todo need to add the newly sold item to the sold filtered list 
+      return currentItems.map((item) =>
+        item._id.toString() === itemId.toString()
+          ? { ...item, status: "sold" }
+          : item
+      );
+    });
   }
 
   function handleSort(e) {
@@ -261,9 +292,7 @@ export default function ListingPage() {
                 />
 
                 {/* Availabilty  Badge */}
-                {item.status === "sold" ? <Sold /> : item.status === "reserved" ? (
-                  <span className="absolute left-3 top-3 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">Reserved</span>
-                ) : null}
+                {item.status === "sold" ? <Sold /> : item.status === "reserved" ? <Reserved /> : null}
               </div>
 
               {/* Information section */}
@@ -295,57 +324,71 @@ export default function ListingPage() {
               {/* Divider */}
               {/* <div className="border-t border-gray-700"></div> */}
 
-              <div className="p-1.5 flex flex-row gap-x-3 justify-center border-2 rounded-md mx-2 my-2">
+              <div className="mx-2 my-2 flex h-12 flex-row items-center justify-center gap-x-1 rounded-md border border-stone-200 p-1.5">
                 <Link
                   href={`/my-listings/edit/${item._id}`}
-                  className="hover:cursor-pointer   flex justify-center items-center rounded-full text-black p-2"
+                  className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg p-2 text-black transition hover:bg-stone-100"
                 >
                   <Edit2 className="size-5"></Edit2>
                 </Link>
 
-                {item.status === "reserved" ? 
-                (
-                // Edit button
-                <button
-                  className="hover:cursor-pointer"
-                  onClick={() => {
-                    setItemToMarkSold(item);
-                  }}
-                >
-                    <div className=" flex flex-row gap-x-2  p-2 text-black rounded-xl">
-                      <CircleCheckBig /> <span>Mark Sold</span>
-                    </div>
+                {item.status === "reserved" && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Mark item as sold"
+                      title="Mark item as sold"
+                      className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg text-black transition hover:bg-stone-100"
+                      onClick={() => setItemToMarkSold(item)}
+                    >
+                      <CircleCheckBig className="size-5" />
+                    </button>
+                    
+                    {/* Release button */}
+                    <button
+                      type="button"
+                      aria-label="Release reservation"
+                      title="Release reservation"
+                      className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg text-black transition hover:bg-stone-100"
+                      onClick={() => setItemToRelease(item)}
+                    >
+                      <RotateCcw className="size-5" />
+                    </button>
+                  </>
+                )}
 
-                    {/* This is the Unreseve button */}
-                    {/* <div className=" flex flex-row gap-x-2  p-2 text-black rounded-xl">
-                      <RotateCcw /> <span>Unreserve</span>
-                    </div> */}
-
-                </button>
-
-                ) : null}
-
-                <button
-                  className="hover:cursor-pointer  flex justify-center items-center rounded-full  text-bkack p-2"
-                  onClick={() => {
-                    async function fetchDeleteItem() {
-                      const success = await deleteItem(item._id);
-                      if (success != null) {
-                        setItems(success);
+                {item.status !== "reserved" && (
+                  <button
+                    className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg p-2 text-black transition hover:bg-stone-100"
+                    onClick={() => {
+                      async function fetchDeleteItem() {
+                        const success = await deleteItem(item._id);
+                        if (success != null) {
+                          setItems(success);
+                        }
                       }
-                    }
-                    fetchDeleteItem();
-                  }}
-                >
-                  <Trash2 className="size-5"></Trash2>
-                </button>
+                      fetchDeleteItem();
+                    }}
+                  >
+                    <Trash2 className="size-5"></Trash2>
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <MarkSoldCodeModal item={itemToMarkSold} onClose={() => setItemToMarkSold(null)} />
+      <MarkSoldCodeModal
+        item={itemToMarkSold}
+        onClose={() => setItemToMarkSold(null)}
+        onSold={handleItemMarkedSold}
+      />
+      <ReleaseReservationModal
+        item={itemToRelease}
+        onClose={() => setItemToRelease(null)}
+        onReleased={handleReservationReleased}
+      />
     </div>
   );
 }

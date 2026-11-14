@@ -230,6 +230,28 @@ export const useItemStore = create((set,get)=>({
         }
     },
 
+    isResendingReservationCode: false,
+    resendReservationCode: async function (itemId) {
+        set({ isResendingReservationCode: true });
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/items/resend-reservation-code/${itemId}`, {
+                method: "POST",
+                credentials: "include",
+                cache: "no-store",
+            });
+            const response = await res.json();
+            if (!res.ok) throw new Error(response.message || "Could not resend the reservation code.");
+
+            toast.success(response.message);
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        } finally {
+            set({ isResendingReservationCode: false });
+        }
+    },
+
     isundoReserving : false,
     undoReserve : async function (ItemId) {
         set({isundoReserving : true});
@@ -257,7 +279,71 @@ export const useItemStore = create((set,get)=>({
         finally {
             set({isundoReserving : false})
         }
-    }
+    },
 
+    isReleasingReservation: false,
+    releaseReservation: async function (itemId) {
+        set({ isReleasingReservation: true });
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/items/release-reservation/${itemId}`, {
+                method: "PATCH",
+                credentials: "include",
+                cache: "no-store",
+            });
+            const response = await res.json();
+            if (!res.ok) throw new Error(response.message);
+
+            set((state) => ({
+                myItems: state.myItems.map((item) =>
+                    item._id.toString() === itemId.toString()
+                        ? { ...item, status: "available" }
+                        : item
+                ),
+            }));
+
+            if (response.buyerNotified) toast.success(response.message);
+            else toast.warning(response.message);
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        } finally {
+            set({ isReleasingReservation: false });
+        }
+    },
+    
+    isVerifying : false,
+    markItemSold : async function (itemId,code) {
+        set({isVerifying : true})
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/items/${itemId}/mark-sold`, 
+                {
+                    method : "PATCH",
+                    headers : {'Content-Type': 'application/json'},
+                    credentials : "include",
+                    body : JSON.stringify({code: code}),
+                    cache : "no-store",
+                }
+            )
+            const response = await res.json();
+            if(!res.ok) throw new Error(response.message)
+            set((state) => ({
+                myItems: state.myItems.map((item) =>
+                    item._id.toString() === itemId.toString()
+                        ? { ...item, status: response.itemStatus || "sold" }
+                        : item
+                ),
+            }));
+            toast.success(response.message);
+            return true;
+        }
+
+        catch(error) {
+            toast.error(error.message);
+            return false;
+        }
+
+        finally {set({isVerifying : false})}
+    }
 
 }));
