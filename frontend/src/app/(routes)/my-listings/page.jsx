@@ -325,14 +325,20 @@ export default function ListingPage() {
               {/* <div className="border-t border-gray-700"></div> */}
 
               <div className="mx-2 my-2 flex min-h-12 flex-row items-center justify-center gap-x-1 rounded-md border border-stone-200 p-1.5 md:h-12">
-                <Link
-                  href={`/my-listings/edit/${item._id}`}
-                  aria-label="Edit listing"
-                  title="Edit listing"
-                  className="flex min-h-10 w-12 shrink-0 cursor-pointer items-center justify-center rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:p-2"
-                >
-                  <Edit2 className="size-5"></Edit2>
-                </Link>
+                { (item.status != "sold") ? 
+                  (
+                    <Link
+                      href={`/my-listings/edit/${item._id}`}
+                      aria-label="Edit listing"
+                      title="Edit listing"
+                      className="flex min-h-10 w-12 shrink-0 cursor-pointer items-center justify-center rounded-lg text-black transition hover:bg-stone-100 md:size-9 md:p-2"
+                    >
+                      <Edit2 className="size-5"></Edit2>
+                    </Link>
+                  ) 
+                  : 
+                  null
+                }
 
                 {item.status === "reserved" && (
                   <>

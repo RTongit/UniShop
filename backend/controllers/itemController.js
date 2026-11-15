@@ -167,6 +167,7 @@ async function editItem(req,res) {
         // Only the seller who owns this active item can edit it.
         const item = await Item.findOne({_id:itemId, seller:authUserId, isDeleted:false});
         if(!item) return res.status(404).json({message : "Cannot edit! Item does not exist"});
+        if(item.status==="sold") return res.status(409).json({message : "Cannot edit! Item is already sold"})
 
         let updatedData = {}
         if(newTitle && newTitle.trim()!="") updatedData.title = newTitle.trim();
