@@ -1,6 +1,7 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { User, MessageCircle, Package, Settings, LogOut, Heart } from "lucide-react"
+import { User, MessageCircle, Package, LogOut, LayoutDashboard } from "lucide-react"
+// import { Settings, Heart } from "lucide-react"
 import Link from "next/link"
 import { useAuthStore } from "../store/authStore"
 import { useRouter } from "next/navigation"
@@ -25,8 +26,9 @@ export default function ProfileDropdown() {
     { icon: <User className="md:size-5 size-3" />, label: "Profile", href: "/profile" },
     { icon: <MessageCircle className="md:size-5 size-3" />, label: "Messages", href: "/chat" },
     { icon: <Package className="md:size-5 size-3" />, label: "My Listings", href: "/my-listings" },
-    { icon: <Settings className="md:size-5 size-3" />, label: "Settings", href: "/settings" },
-    { icon: <Heart className="md:size-5 size-3" />, label: "Wishlist", href: "/wishlist" },
+    // Settings and Wishlist are hidden until those features are ready.
+    // { icon: <Settings className="md:size-5 size-3" />, label: "Settings", href: "/settings" },
+    // { icon: <Heart className="md:size-5 size-3" />, label: "Wishlist", href: "/wishlist" },
   ]
 
   return (
@@ -74,6 +76,19 @@ export default function ProfileDropdown() {
               </Link>
             ))}
           </div>
+
+          {authUser?.role === "admin" && (
+            <div className="p-2 pt-0">
+              <Link
+                href="/admin/dashboard"
+                onClick={() => setOpen(false)}
+                className="w-full flex items-center gap-4 rounded-xl px-4 py-3.5 text-sm font-medium text-gray-300 transition-colors hover:bg-[#2a2a2a] hover:text-white"
+              >
+                <LayoutDashboard size={18} className="text-gray-400" />
+                Admin Dashboard
+              </Link>
+            </div>
+          )}
 
           {/* Divider */}
           <div className="border-t border-white/10 mx-2" />

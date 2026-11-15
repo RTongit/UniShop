@@ -249,7 +249,7 @@ async function reserveItem(req,res) {
         if(!existingChat) return res.status(404).json({message : "Start a chat with the seller before reserving this item."});
 
         // check for the item validity and it is available or not : 
-        const existingItem = await Item.findOne({_id : itemId,seller : {$ne : authUserId}, status : "available"})
+        const existingItem = await Item.findOne({_id : itemId,seller : {$ne : authUserId}, status : "available",isDeleted : false})
         if(!existingItem) return res.status(409).json({message : "Item is no longer available."});
 
         // Atomically claim the item. Only one concurrent request can succeed preventing race condition.
@@ -258,6 +258,7 @@ async function reserveItem(req,res) {
                 _id: itemId,
                 seller: { $ne: authUserId  },
                 status: "available",
+                isDeleted : false,
             },
             { $set: { status: "reserved" } },
             {returnDocument : "after"}

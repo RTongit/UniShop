@@ -1,5 +1,6 @@
 "use client";
-import { LayoutDashboard, ShieldCheck, ShoppingBag, Users } from "lucide-react";
+import { LayoutDashboard, ShieldCheck } from "lucide-react";
+// import { ShoppingBag, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -30,7 +31,7 @@ const AdminSidePanel = ({ onNavigate }) => {
         <span>Verification</span>
       </Link>
 
-      {/* Students */}
+      {/* Students navigation temporarily hidden:
       <Link href="/admin/students" 
          className={`flex gap-x-2 ${activeSection==="students" ? "bg-black text-white" : "bg-white text-black"}  px-3 py-5 font-medium`}
          onClick={()=>{setActiveSection("students"); onNavigate?.()}}
@@ -38,8 +39,9 @@ const AdminSidePanel = ({ onNavigate }) => {
         <Users size={20} />
         <span>Students</span>
       </Link>
+      */}
 
-      {/* Listings */}
+      {/* Listings navigation temporarily hidden:
       <Link href="/admin/listings" 
          className={`flex gap-x-2 ${activeSection==="listings" ? "bg-black text-white" : "bg-white text-black"}  px-3 py-5 font-medium`}
          onClick={()=>{setActiveSection("Listings"); onNavigate?.()}}
@@ -47,6 +49,7 @@ const AdminSidePanel = ({ onNavigate }) => {
         <ShoppingBag size={20} />
         <span>Listings</span>
       </Link>
+      */}
 
     </div>
   );

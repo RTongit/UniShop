@@ -25,7 +25,6 @@ export default function HomePage() {
     <div className="flex flex-col gap-y-5 p-2">
       <HomePageHeader />
       <BrowseCategories />
-      {authUser.role === "admin" ? <Link href="/admin/dashboard">Go to Admin</Link> : null}
       <footer className="-mx-2 -mb-2 mt-12">
         <div className="bg-[#05051b] px-7 py-12 text-white sm:px-12 sm:py-16 lg:px-16">
           <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-[1fr_auto_auto] md:gap-20">
