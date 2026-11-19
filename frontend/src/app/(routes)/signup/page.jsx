@@ -93,6 +93,14 @@ export default function SignupPage() {
       toast.error("Please enter your email")
       return;
     }
+    // check the email format : 
+    if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Please enter a valid email address")
+      return;
+    }
+
+    // todo : check if the email is real or fake 
+
     let data = {
       name,
       enrollmentId,

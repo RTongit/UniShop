@@ -53,13 +53,18 @@ The purchase record stores the item, buyer, seller, pickup-location snapshot, st
 - The API accepts only `verified` or `rejected`, applies changes only to pending student accounts, and returns a conflict if the request was already reviewed.
 - Verification reviews the student's submitted account details; proof-document upload is not part of the current schema or flow.
 
+### Admin dashboard
+
+- The admin dashboard shows live counts of pending, verified, and rejected student accounts, loaded from the verification-request API.
+- Admin routes are guarded in the frontend by the user's admin role, and admin APIs require both authentication and the `isAdmin` middleware.
+- The verification page is the active admin workflow. Student and listing management routes are present in navigation but are not backed by management APIs yet.
+
 ## Current limitations and follow-up work
 
 - `expiresAt` is saved as 24 hours after reservation, but there is no scheduled worker to expire reservations automatically or reopen their listings. Sellers can release a reservation manually. The `expired` purchase status is defined but not automatically applied.
 - Reservation-code resend has no cooldown or rate limit yet. A TODO for a resend cooldown is recorded in the purchase model.
 - Email uses Resend's `onboarding@resend.dev` sender. Resend testing mode is limited to the account's verified recipient; sending to real buyers requires a verified sending domain and an updated sender address.
-- The admin dashboard, admin student-management page, and admin listing-management page are placeholders. The connected admin feature is student verification.
-- The wishlist page is a placeholder; wishlist actions are not persisted.
+- Wishlist persistence and user settings are not part of the current backend feature set.
 - There is no admin-provisioning API. For local development, assign the admin role directly to a trusted account in MongoDB.
 - The chat message controller updates the per-chat unread flag and global unread count in separate writes. Concurrent messages can race; harden this transition before relying on exact counts under heavy concurrent traffic.
 - `undoReserve` uses a MongoDB transaction. Use MongoDB Atlas or a local replica set for that operation; a standalone MongoDB server does not support multi-document transactions.
@@ -91,7 +96,7 @@ UniShop/
 │   └── index.js           # Express and authenticated Socket.IO server
 └── frontend/
     └── src/app/
-        ├── (routes)/      # Marketplace, account, chat, and admin pages
+        ├── (routes)/      # Marketplace, account, chat, listings, and admin pages
         ├── components/    # Shared UI and chat/reservation components
         └── store/         # Zustand auth, item, and chat stores
 ```
@@ -163,9 +168,10 @@ The backend CORS and Socket.IO CORS settings allow `http://localhost:3000` and t
 | `/my-listings/edit/[itemId]` | Edit an owned listing; verified students |
 | `/chat`, `/chat/[chatId]` | Chat list and listing-specific conversation; verified students |
 | `/profile` | View account details and update profile photo |
-| `/admin/verification` | Review student verification requests; admins |
-| `/admin/dashboard`, `/admin/students`, `/admin/listings` | Placeholder admin pages |
-| `/wishlist` | Placeholder page |
+| `/admin/dashboard` | Admin-only dashboard with pending, verified, and rejected student counts |
+| `/admin/verification` | Review and approve or reject student verification requests; admins |
+| `/admin/students`, `/admin/listings` | Admin navigation destinations reserved for future management workflows |
+| `/wishlist` | Wishlist page |
 
 Client-side route checks support navigation and user experience. The backend middleware enforces authorization for protected APIs.
 

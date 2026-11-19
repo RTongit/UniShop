@@ -3,6 +3,8 @@ import User from "../models/UserModel.js";
 import bcrypt from "bcryptjs"
 import cloudinary from "../lib/cloudinary.js";
 
+async function resetPassword(req, res) {}
+
 async function signup(req,res) {
     const {name,enrollmentId,password,department,graduationYear,phoneNumber,email} = req.body;
     try {
@@ -13,6 +15,11 @@ async function signup(req,res) {
 
         if(password.length<6) {
             return res.status(400).json({message:"Password must be atleast 6 characters long"})
+        }
+
+        // check the email format : 
+        if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+           return res.status(400).json({ message: "Enter a valid email address." });
         }
 
         // Check for duplicate email : 
@@ -166,4 +173,4 @@ async function updateProfile(req, res) {
 }
 
 
-export {signup,login,logout,authCheck,getProfile,updateProfile};
+export {signup,login,logout,authCheck,getProfile,updateProfile,resetPassword};

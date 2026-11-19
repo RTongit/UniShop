@@ -63,7 +63,15 @@ const userSchema = new mongoose.Schema(
         unreadChatCount : {
             type : Number,
             default : 0
-        }
+        },
+        passwordResetTokenHash: {
+            type: String,
+            default: null,
+        },
+        passwordResetExpiresAt: {
+            type: Date,
+            default: null,
+        },
     },
 
     {

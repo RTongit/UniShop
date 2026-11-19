@@ -39,6 +39,7 @@ export async function sendReservationCodeEmail(
   return data;
 }
 
+
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => ({
     "&": "&amp;",
