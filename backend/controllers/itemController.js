@@ -128,7 +128,6 @@ async function getSingleItem(req,res) {
                 verificationStatus : seller.verificationStatus,
                 department : seller.department,
                 graduationYear : seller.graduationYear,
-                phoneNumber : seller.phoneNumber,
                 joinedAt : seller.createdAt
         }
     });

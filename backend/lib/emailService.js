@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function sendReservationCodeEmail(
+async function sendReservationCodeEmail(
   to,
   code,
   itemTitle,
@@ -39,6 +39,27 @@ export async function sendReservationCodeEmail(
   return data;
 }
 
+async function sendPasswordResetEmail(to, resetUrl) {
+  const safeResetUrl = escapeHtml(resetUrl);
+
+  const { data, error } = await resend.emails.send({
+    from: "UniShop <onboarding@resend.dev>",
+    to,
+    subject: "Reset your UniShop password",
+    html: `
+      <h2>Password reset request</h2>
+      <p>Click the link below to set a new password:</p>
+      <p><a href="${safeResetUrl}">Reset password</a></p>
+      <p>If you did not request this, you can ignore this email.</p>
+    `,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -49,3 +70,5 @@ function escapeHtml(value) {
     "'": "&#39;",
   })[character]);
 }
+
+export {sendReservationCodeEmail,sendPasswordResetEmail}

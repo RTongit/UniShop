@@ -69,6 +69,10 @@ export default function SignupPage() {
       toast.error("Please enter password");
       return;
     }
+    if(password.length<6) {
+      toast.error("Password must be atleast 6 characters long");
+      return;
+    }
 
     if (!department || department.trim() === "") {
       toast.error("Please enter a Department");

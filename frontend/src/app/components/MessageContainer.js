@@ -335,7 +335,7 @@ const MessageContainer = ({ chatId }) => {
 
       </div>
 
-      {/* UI-only reservation bar; wire its controls to the Purchase flow later. */}
+      {/*reservation bar;*/}
       <div className="flex h-[60px] min-h-[60px] shrink-0 flex-nowrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-2 py-2 sm:h-auto sm:min-h-[68px] sm:gap-3 sm:px-5">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <div className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-lg bg-slate-100 text-slate-400 sm:size-12">
