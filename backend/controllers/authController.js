@@ -2,8 +2,10 @@ import createJWT from "../lib/jwt.js";
 import User from "../models/UserModel.js";
 import bcrypt from "bcryptjs"
 import cloudinary from "../lib/cloudinary.js";
-import { randomBytes } from "node:crypto";
+import { createHash,randomBytes } from "node:crypto";
 import { sendPasswordResetEmail } from "../lib/emailService.js";
+
+const FRONTEND_URL =  process.env.FRONTEND_URL 
 
 async function requestPasswordReset(req, res) {
     const {email} = req.body
@@ -33,7 +35,7 @@ async function requestPasswordReset(req, res) {
 
         // sends an email link with the actual token 
         try {
-            const resetUrl = `https://uni-shop-jet.vercel.app/reset-password?token=${resetToken}`;
+            const resetUrl = `${FRONTEND_URL}/api/auth/reset-password?token=${resetToken}`;
             await sendPasswordResetEmail(existingUser.email,resetUrl)
 
         }
@@ -49,14 +51,14 @@ async function requestPasswordReset(req, res) {
                 }
             )
 
-            console.log(`Error in resetPassword controller : ${sendEmailError.message}`);
+            console.log(`Error in requestPasswordReset controller : ${sendEmailError.message}`);
             return res.status(500).json({message : "We couldn’t process your request right now. Please try again later."})
         }
 
     }
 
     catch(error) {
-        console.log(`Error in resetPassword controller : ${error.message}`);
+        console.log(`Error in requestPasswordReset controller : ${error.message}`);
         return res.status(500).json({message : "Internal Server error"})
     }
     return res.status(200).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."})
