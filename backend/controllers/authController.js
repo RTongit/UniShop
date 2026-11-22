@@ -2,8 +2,65 @@ import createJWT from "../lib/jwt.js";
 import User from "../models/UserModel.js";
 import bcrypt from "bcryptjs"
 import cloudinary from "../lib/cloudinary.js";
+import { randomBytes } from "node:crypto";
+import { sendPasswordResetEmail } from "../lib/emailService.js";
 
-async function resetPassword(req, res) {}
+async function requestPasswordReset(req, res) {
+    const {email} = req.body
+    try {
+        // check if the user exist or not in db based on the email :
+        const existingUser = await User.findOne({email : email});
+        
+        if(!existingUser) return res.status(400).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."});
+
+        // generating the token : 
+        const resetToken = randomBytes(32).toString("hex");
+
+        // hashing the token : 
+        const resetTokenHash = createHash("sha256") // choose SHA-256 as the hashing algorithm
+        .update(resetToken)                        // give the token to the hash function
+        .digest("hex");                            // output the hash as a hex string
+
+    
+        // storing the hashed token to the db along with the expiry time: 
+        await User.findOneAndUpdate({email : email}, 
+            {$set : {  passwordResetTokenHash : resetTokenHash, 
+                       passwordResetExpiresAt : new Date(Date.now() + 30 * 60 * 1000) 
+                       // validity 30 min 
+                    }
+            }
+        )
+
+        // sends an email link with the actual token 
+        try {
+            const resetUrl = `https://uni-shop-jet.vercel.app/reset-password?token=${resetToken}`;
+            await sendPasswordResetEmail(existingUser.email,resetUrl)
+
+        }
+        catch(sendEmailError) {
+
+            // revert the changes made to the DB : 
+            await User.findOneAndUpdate(
+                {email : email, passwordResetTokenHash: resetTokenHash,}, 
+                {$set : {  passwordResetTokenHash : null, 
+                           passwordResetExpiresAt : null,
+                           // validity 30 min 
+                        }
+                }
+            )
+
+            console.log(`Error in resetPassword controller : ${sendEmailError.message}`);
+            return res.status(500).json({message : "We couldn’t process your request right now. Please try again later."})
+        }
+
+    }
+
+    catch(error) {
+        console.log(`Error in resetPassword controller : ${error.message}`);
+        return res.status(500).json({message : "Internal Server error"})
+    }
+    return res.status(200).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."})
+}
 
 async function signup(req,res) {
     const {name,enrollmentId,password,department,graduationYear,phoneNumber,email} = req.body;
@@ -173,4 +230,4 @@ async function updateProfile(req, res) {
 }
 
 
-export {signup,login,logout,authCheck,getProfile,updateProfile,resetPassword};
+export {signup,login,logout,authCheck,getProfile,updateProfile,requestPasswordReset};
