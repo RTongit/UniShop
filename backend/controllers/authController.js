@@ -35,8 +35,8 @@ async function requestPasswordReset(req, res) {
 
         // sends an email link with the actual token 
         try {
-            const resetUrl = `${FRONTEND_URL}/api/auth/reset-password?token=${resetToken}`;
-            await sendPasswordResetEmail(existingUser.email,resetUrl)
+            const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+            await sendPasswordResetEmail(existingUser.email,resetUrl);
 
         }
         catch(sendEmailError) {
@@ -63,6 +63,7 @@ async function requestPasswordReset(req, res) {
     }
     return res.status(200).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."})
 }
+
 
 async function signup(req,res) {
     const {name,enrollmentId,password,department,graduationYear,phoneNumber,email} = req.body;
@@ -231,5 +232,19 @@ async function updateProfile(req, res) {
     }
 }
 
+async function resetPassword(req,res) {
+    const {token, newPassword} = req.body
+    try {
+        // check the token : 
+        
 
-export {signup,login,logout,authCheck,getProfile,updateProfile,requestPasswordReset};
+        // update the password 
+    }
+
+    catch(error) {
+
+    }
+}
+
+
+export {signup,login,logout,authCheck,getProfile,updateProfile,requestPasswordReset,resetPassword};

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function ResetPasswordPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
@@ -54,6 +56,13 @@ export default function ResetPasswordPage() {
             Reset password (not connected yet)
           </button>
         </form>
+
+        <p className="mt-5 text-center text-sm text-slate-600">
+          Remembered your password?{" "}
+          <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+            Back to login
+          </Link>
+        </p>
       </section>
     </main>
   );
