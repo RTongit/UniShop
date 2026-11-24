@@ -26,11 +26,12 @@ export default function Navbar() {
 
   useEffect(()=>{
     async function fetchData() {
+      if (!authUser) return;
       await getGlobalNotificationStatus()
     }
     fetchData();
   },
-  [getGlobalNotificationStatus])
+  [getGlobalNotificationStatus,authUser])
 
   // It listens for global notification event named = newGlobalNotification
   useEffect(
