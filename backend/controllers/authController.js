@@ -7,63 +7,6 @@ import { sendPasswordResetEmail } from "../lib/emailService.js";
 
 const FRONTEND_URL =  process.env.FRONTEND_URL 
 
-async function requestPasswordReset(req, res) {
-    const {email} = req.body
-    try {
-        // check if the user exist or not in db based on the email :
-        const existingUser = await User.findOne({email : email});
-        
-        if(!existingUser) return res.status(400).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."});
-
-        // generating the token : 
-        const resetToken = randomBytes(32).toString("hex");
-
-        // hashing the token : 
-        const resetTokenHash = createHash("sha256") // choose SHA-256 as the hashing algorithm
-        .update(resetToken)                        // give the token to the hash function
-        .digest("hex");                            // output the hash as a hex string
-
-    
-        // storing the hashed token to the db along with the expiry time: 
-        await User.findOneAndUpdate({email : email}, 
-            {$set : {  passwordResetTokenHash : resetTokenHash, 
-                       passwordResetExpiresAt : new Date(Date.now() + 30 * 60 * 1000) 
-                       // validity 30 min 
-                    }
-            }
-        )
-
-        // sends an email link with the actual token 
-        try {
-            const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
-            await sendPasswordResetEmail(existingUser.email,resetUrl);
-
-        }
-        catch(sendEmailError) {
-
-            // revert the changes made to the DB : 
-            await User.findOneAndUpdate(
-                {email : email, passwordResetTokenHash: resetTokenHash,}, 
-                {$set : {  passwordResetTokenHash : null, 
-                           passwordResetExpiresAt : null,
-                           // validity 30 min 
-                        }
-                }
-            )
-
-            console.log(`Error in requestPasswordReset controller : ${sendEmailError.message}`);
-            return res.status(500).json({message : "We couldn’t process your request right now. Please try again later."})
-        }
-
-    }
-
-    catch(error) {
-        console.log(`Error in requestPasswordReset controller : ${error.message}`);
-        return res.status(500).json({message : "Internal Server error"})
-    }
-    return res.status(200).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."})
-}
-
 
 async function signup(req,res) {
     const {name,enrollmentId,password,department,graduationYear,phoneNumber,email} = req.body;
@@ -232,19 +175,121 @@ async function updateProfile(req, res) {
     }
 }
 
-async function resetPassword(req,res) {
-    const {token, newPassword} = req.body
+async function requestPasswordReset(req, res) {
+    const {email} = req.body
     try {
-        // check the token : 
+        // check if the user exist or not in db based on the email :
+        const existingUser = await User.findOne({email : email});
         
+        if(!existingUser) return res.status(400).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."});
 
-        // update the password 
+        // generating the token : 
+        const resetToken = randomBytes(32).toString("hex");
+
+        // hashing the token : 
+        const resetTokenHash = createHash("sha256") // choose SHA-256 as the hashing algorithm
+        .update(resetToken)                        // give the token to the hash function
+        .digest("hex");                            // output the hash as a hex string
+
+    
+        // storing the hashed token to the db along with the expiry time: 
+        await User.findOneAndUpdate({email : email}, 
+            {$set : {  passwordResetTokenHash : resetTokenHash, 
+                       passwordResetExpiresAt : new Date(Date.now() + 30 * 60 * 1000) 
+                       // validity 30 min 
+                    }
+            }
+        )
+
+        // sends an email link with the actual token 
+        try {
+            const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+            await sendPasswordResetEmail(existingUser.email,resetUrl);
+
+        }
+        catch(sendEmailError) {
+
+            // revert the changes made to the DB : 
+            await User.findOneAndUpdate(
+                {email : email, passwordResetTokenHash: resetTokenHash,}, 
+                {$set : {  passwordResetTokenHash : null, 
+                           passwordResetExpiresAt : null,
+                           // validity 30 min 
+                        }
+                }
+            )
+
+            console.log(`Error in requestPasswordReset controller : ${sendEmailError.message}`);
+            return res.status(500).json({message : "We couldn’t process your request right now. Please try again later."})
+        }
+
     }
 
     catch(error) {
-
+        console.log(`Error in requestPasswordReset controller : ${error.message}`);
+        return res.status(500).json({message : "Internal Server error"})
     }
+    return res.status(200).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."})
 }
 
+async function resetPassword(req,res) {
+    const {token, newPassword} = req.body
+    try {
+
+        // check for empty token and password : 
+        if(!token || typeof token !== "string" || token.trim() === "") return res.status(400).json({message : "Invalid or missing reset token."})
+        if(!newPassword || typeof newPassword !== "string" || newPassword.length === 0) return res.status(400).json({message : "Password is empty"})
+        if(newPassword.length<6) return res.status(400).json({message : "Password must be atleast 6 characters long"})
+
+        // hashing the token : 
+        const hashedToken = createHash("sha256") // choose SHA-256 as the hashing algorithm
+        .update(token)                        // give the token to the hash function
+        .digest("hex");  
+
+        const existingUser = await User.findOne(
+            {
+                passwordResetTokenHash : hashedToken,
+                passwordResetExpiresAt : {$gt : new Date()}
+            }
+        )
+        if(!existingUser) return res.status(400).json({message : "This password reset link is invalid or has expired. Please request a new one."})
+
+        // hash the newPassword 
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(newPassword,salt);
+
+        // update the user password 
+        const updatedUser = await User.findOneAndUpdate(
+            {_id : existingUser._id, passwordResetTokenHash : hashedToken, passwordResetExpiresAt : {$gt : new Date()}},
+            {$set : 
+                {
+                    password : hashedNewPassword,
+                    passwordResetTokenHash : null,
+                    passwordResetExpiresAt : null
+                }
+            },
+            {returnDocument : "after"}
+        )
+
+        // if the token gets expired just before updating the user 
+        // if two request happens at the same time 
+        // the below handles that 
+
+        if (!updatedUser) {
+           return res.status(400).json({
+           message: "This password reset link is invalid or has expired. Please request a new one.",
+           });
+        }
+
+        // todo : also the devices that this user is logged in must be logged out ,ie jwt must be cleared
+
+        return res.status(200).json({message : "Password has been reset successfully. Please log in with your new password."})
+    }
+
+    catch(error) {
+        console.log(`Error in resetPassword controller: ${error.message}`);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
 
 export {signup,login,logout,authCheck,getProfile,updateProfile,requestPasswordReset,resetPassword};
