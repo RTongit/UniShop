@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
   
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
+    <main className="flex min-h-screen items-start justify-center bg-slate-50 px-4 pb-10 pt-8">
       <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-sm font-semibold text-blue-600">UniShop</p>
         <h1 className="mt-3 text-2xl font-semibold text-slate-900">
@@ -73,7 +73,8 @@ export default function ForgotPasswordPage() {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+            disabled={sending}
+            className="w-full rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
             {sending==false ? "Send reset link" : "Sending..."}
           </button>

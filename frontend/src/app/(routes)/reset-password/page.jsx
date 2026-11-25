@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import ButtonSpinner from "@/app/components/ButtonSpinner";
@@ -9,6 +9,7 @@ import ButtonSpinner from "@/app/components/ButtonSpinner";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
   const [newPassword, setNewPassword] = useState("");
@@ -45,7 +46,8 @@ export default function ResetPasswordPage() {
         });
         const response = await res.json();
         if (!res.ok) throw new Error(response.message);
-        toast.success(response.message);
+        toast.success(response.message, { duration: 6000 });
+        setTimeout(() => router.replace("/login"), 2000);
       } catch (error) {
         toast.error(error.message);
       } finally {
@@ -57,7 +59,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
+    <main className="flex min-h-screen items-start justify-center bg-slate-50 px-4 pb-10 pt-8 sm:items-center sm:py-10">
       <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-sm font-semibold text-blue-600">UniShop</p>
         <h1 className="mt-3 text-2xl font-semibold text-slate-900">
@@ -136,7 +138,7 @@ export default function ResetPasswordPage() {
           Remembered your password?{" "}
           <Link
             href="/login"
-            className="font-semibold text-blue-600 hover:underline"
+            className="whitespace-nowrap font-semibold text-blue-600 hover:underline"
           >
             Back to login
           </Link>
