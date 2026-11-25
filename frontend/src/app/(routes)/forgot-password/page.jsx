@@ -25,6 +25,7 @@ export default function ForgotPasswordPage() {
         })
         const response = await res.json();
         if(!res.ok) throw new Error(response.message);
+        toast.success(response.message)
       }
       catch(error) {
         toast.error(error.message);

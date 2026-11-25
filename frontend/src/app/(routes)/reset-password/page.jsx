@@ -1,39 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import ButtonSpinner from "@/app/components/ButtonSpinner";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function ResetPasswordPage() {
-  const [token, setToken] = useState("");
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") || "";
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [formMessage, setFormMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  useEffect(() => {
-    const queryToken = new URLSearchParams(window.location.search).get("token");
-    setToken(queryToken || "");
-  }, []);
+  const [isResetting, setIsResetting] = useState(false);
 
   function handleSubmit(event) {
     event.preventDefault();
-    setIsSuccess(false);
 
     if (!token) {
-      setFormMessage("This reset link does not contain a token.");
+      toast.error("This reset link does not contain a token.");
       return;
     }
     if (newPassword.length < 6) {
-      setFormMessage("Your password must be at least 6 characters long.");
+      toast.error("Your password must be at least 6 characters long.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setFormMessage("The passwords do not match.");
+      toast.error("The passwords do not match.");
       return;
     }
+    const data = {token : token, newPassword : newPassword};
 
-    setFormMessage("Demo only: the form is valid, but your password has not been changed because this page isn’t connected to the backend yet.");
-    setIsSuccess(true);
+    // fetch the backend :
+    async function resetPassword(data) {
+      setIsResetting(true)
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/auth/reset-password`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+          cache: "no-store",
+          credentials: "include",
+        });
+        const response = await res.json();
+        if (!res.ok) throw new Error(response.message);
+        toast.success(response.message);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setIsResetting(false)
+      }
+    }
+
+    resetPassword(data);
   }
 
   return (
@@ -48,8 +68,12 @@ export default function ResetPasswordPage() {
         </p>
 
         {!token && (
-          <p role="status" className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-            No reset token was found in this link. Open the reset link from your email.
+          <p
+            role="status"
+            className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800"
+          >
+            No reset token was found in this link. Open the reset link from your
+            email.
           </p>
         )}
 
@@ -96,22 +120,24 @@ export default function ResetPasswordPage() {
 
           <button
             type="submit"
-            disabled={!token}
-            className="w-full rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+            disabled={!token || isResetting}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            Reset password
+            {isResetting ? (
+              <>
+                <ButtonSpinner />
+                Resetting password...
+              </>
+            ) : "Reset password"}
           </button>
         </form>
 
-        {formMessage && (
-          <p role="status" className={`mt-4 rounded-lg p-3 text-sm leading-5 ${isSuccess ? "bg-blue-50 text-blue-800" : "bg-rose-50 text-rose-700"}`}>
-            {formMessage}
-          </p>
-        )}
-
         <p className="mt-5 text-center text-sm text-slate-600">
           Remembered your password?{" "}
-          <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+          <Link
+            href="/login"
+            className="font-semibold text-blue-600 hover:underline"
+          >
             Back to login
           </Link>
         </p>

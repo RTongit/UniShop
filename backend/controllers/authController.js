@@ -191,7 +191,6 @@ async function requestPasswordReset(req, res) {
         .update(resetToken)                        // give the token to the hash function
         .digest("hex");                            // output the hash as a hex string
 
-    
         // storing the hashed token to the db along with the expiry time: 
         await User.findOneAndUpdate({email : email}, 
             {$set : {  passwordResetTokenHash : resetTokenHash, 
@@ -222,6 +221,7 @@ async function requestPasswordReset(req, res) {
             console.log(`Error in requestPasswordReset controller : ${sendEmailError.message}`);
             return res.status(500).json({message : "We couldn’t process your request right now. Please try again later."})
         }
+        return res.status(200).json({message : "If an account exists with that email, you’ll receive a password reset link through that email"})
 
     }
 
@@ -229,7 +229,6 @@ async function requestPasswordReset(req, res) {
         console.log(`Error in requestPasswordReset controller : ${error.message}`);
         return res.status(500).json({message : "Internal Server error"})
     }
-    return res.status(200).json({message : "If an account exists with that email, you’ll receive a password reset link shortly."})
 }
 
 async function resetPassword(req,res) {
