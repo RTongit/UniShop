@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import ButtonSpinner from "@/app/components/ButtonSpinner";
+import PasswordSideImage from "@/app/components/PasswordSideImage";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -60,8 +61,11 @@ export default function ResetPasswordPage() {
 
   return (
     <main className="flex min-h-screen items-start justify-center bg-slate-50 px-4 pb-10 pt-8 sm:items-center sm:py-10">
-      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-semibold text-blue-600">UniShop</p>
+      <div className="w-full max-w-md lg:grid lg:max-w-5xl lg:grid-cols-2 lg:overflow-hidden lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white lg:shadow-sm">
+      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:max-w-none lg:rounded-none lg:border-0 lg:shadow-none lg:p-12">
+        <Link href="/" aria-label="UniShop home" className="inline-flex">
+          <img src="/favicon.ico" alt="UniShop" className="size-8 object-contain" />
+        </Link>
         <h1 className="mt-3 text-2xl font-semibold text-slate-900">
           Reset your password
         </h1>
@@ -144,6 +148,8 @@ export default function ResetPasswordPage() {
           </Link>
         </p>
       </section>
+      <PasswordSideImage />
+      </div>
     </main>
   );
 }
