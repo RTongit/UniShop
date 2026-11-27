@@ -140,7 +140,7 @@ export default function LoginPage() {
         </div>
 
         {/* Right section */}
-        <div className="md:block hidden w-full">
+        <div className="hidden lg:block w-full">
             <RightSectionUI/>
         </div>
        

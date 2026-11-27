@@ -395,7 +395,7 @@ export default function SignupPage() {
         </div>
       </div>
       {/* Right Section */}
-      <div className="md:block hidden w-full">
+      <div className="hidden lg:block w-full">
           <RightSectionUI/>
       </div>
 
