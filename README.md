@@ -13,6 +13,7 @@ UniShop is a campus marketplace for students to list and discover second-hand it
 
 - Students sign up with academic and contact details. New accounts begin as `pending`.
 - Passwords are hashed with bcryptjs. The API issues a JWT in an HTTP-only cookie.
+- Forgot-password requests send a reset link by email. The link contains a random one-time token; only its SHA-256 hash and a 30-minute expiry are stored in MongoDB. Resetting the password verifies and consumes that token, hashes the new password with bcryptjs, and directs the user back to login.
 - Protected API middleware loads the user's role and verification status from MongoDB.
 - Pending or rejected students can sign in, but verified status is required for selling, messaging, and reservation APIs.
 - Students can view their profile and change their profile photo. Other account details are read-only in the profile UI.
@@ -63,7 +64,8 @@ The purchase record stores the item, buyer, seller, pickup-location snapshot, st
 
 - `expiresAt` is saved as 24 hours after reservation, but there is no scheduled worker to expire reservations automatically or reopen their listings. Sellers can release a reservation manually. The `expired` purchase status is defined but not automatically applied.
 - Reservation-code resend has no cooldown or rate limit yet. A TODO for a resend cooldown is recorded in the purchase model.
-- Email uses Resend's `onboarding@resend.dev` sender. Resend testing mode is limited to the account's verified recipient; sending to real buyers requires a verified sending domain and an updated sender address.
+- Email uses Resend's `onboarding@resend.dev` sender for reservation codes and password-reset links. Resend testing mode is limited to the account's verified recipient; sending to real users requires a verified sending domain and an updated sender address.
+- Password reset does not revoke JWTs already issued to the user's other devices. Those sessions can remain valid until their normal token expiry; session invalidation is follow-up work.
 - Wishlist persistence and user settings are not part of the current backend feature set.
 - There is no admin-provisioning API. For local development, assign the admin role directly to a trusted account in MongoDB.
 - The chat message controller updates the per-chat unread flag and global unread count in separate writes. Concurrent messages can race; harden this transition before relying on exact counts under heavy concurrent traffic.
@@ -160,6 +162,8 @@ The backend CORS and Socket.IO CORS settings allow `http://localhost:3000` and t
 | --- | --- |
 | `/` | Marketplace landing page and category browsing; signed-in users |
 | `/signup`, `/login` | Student registration and sign-in |
+| `/forgot-password` | Request an email password-reset link |
+| `/reset-password?token=...` | Set a new password using the one-time email token |
 | `/categories` | Category browser |
 | `/search?title=...` | Search available listings; signed-in users |
 | `/item/[itemid]` | Listing details and seller information |
@@ -189,6 +193,8 @@ Local API base URL: `http://localhost:5000`. Protected routes use the `authCooki
 | `GET` | `/api/auth/check` | Signed in | Return current identity and verification status |
 | `GET` | `/api/auth/profile` | Signed in | Get the current user's profile |
 | `PATCH` | `/api/auth/profile` | Signed in | Upload/update the profile photo |
+| `POST` | `/api/auth/forgot-password` | Public | Request a password-reset email; returns a generic message to avoid disclosing whether an account exists |
+| `PATCH` | `/api/auth/reset-password` | Public, reset token required | Validate the unexpired one-time token, hash the new password, and clear the reset token fields |
 
 ### Listings and reservations
 
@@ -239,7 +245,7 @@ The server emits:
 
 ## Data models
 
-- **User:** role, student identity/contact/academic details, verification state and rejection reason, profile photo, and global unread-chat count.
+- **User:** role, student identity/contact/academic details, verification state and rejection reason, profile photo, global unread-chat count, and nullable password-reset token hash/expiry fields.
 - **Item:** seller, listing details, price, image URLs, pickup location, `available`/`reserved`/`sold` status, and soft-delete flag.
 - **Chat:** buyer, seller, item, and one unread-message flag for each participant.
 - **Message:** chat, sender, receiver, optional text/image, and seen state.
